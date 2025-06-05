@@ -140,7 +140,7 @@ export const GlobalColors = {
     },
   },
   primaryYellow: {
-    xanthous: {
+    primary: {
       100: "#352805",
       200: "#6b4f09",
       300: "#a0770e",
@@ -151,7 +151,7 @@ export const GlobalColors = {
       800: "#f8e3ae",
       900: "#fbf1d7",
     },
-    mustard: {
+    primary_accent: {
       100: "#463200",
       200: "#8d6500",
       300: "#d39700",
@@ -162,7 +162,7 @@ export const GlobalColors = {
       800: "#ffedc0",
       900: "#fff6df",
     },
-    coyote: {
+    secondary: {
       100: "#191513",
       200: "#322b25",
       300: "#4c4038",
@@ -173,7 +173,7 @@ export const GlobalColors = {
       800: "#cec4bc",
       900: "#e6e1de",
     },
-    van_dyke: {
+    secondary_accent: {
       100: "#0b0908",
       200: "#161310",
       300: "#211c19",
