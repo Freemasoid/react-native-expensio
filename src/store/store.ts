@@ -10,13 +10,16 @@ import {
   REGISTER,
   REHYDRATE,
 } from "redux-persist";
+import themeReducer from "./slices/themeSlice";
 
 const persistConfig = {
   key: "root",
   storage: AsyncStorage,
 };
 
-const rootReducer = combineReducers({});
+const rootReducer = combineReducers({
+  theme: themeReducer,
+});
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
