@@ -1,4 +1,4 @@
-import { AddButton, BlurTabBarBackground } from "@/components";
+import { AddButton, BlurTabBarBackground } from "@/components/layout";
 import { useTheme } from "@/hooks/useTheme";
 import { persistor, store } from "@/store/store";
 import { PlatformPressable } from "@react-navigation/elements";
