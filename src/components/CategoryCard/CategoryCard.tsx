@@ -111,6 +111,6 @@ const styles = (colors: any) =>
     progress: {
       height: 8,
       borderRadius: 9999,
-      backgroundColor: colors.primary_accent[500],
+      backgroundColor: colors.primary[600],
     },
   });

@@ -1,4 +1,4 @@
-import { AddButton, BlurTabBarBackground } from "@/components/layout";
+import { AddButton } from "@/components/layout";
 import { useTheme } from "@/hooks/useTheme";
 import { persistor, store } from "@/store/store";
 import { PlatformPressable } from "@react-navigation/elements";
@@ -27,7 +27,6 @@ function TabsLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: colors.primary[500],
-        tabBarBackground: BlurTabBarBackground,
         headerShown: false,
         tabBarButton: (props) => (
           <PlatformPressable
