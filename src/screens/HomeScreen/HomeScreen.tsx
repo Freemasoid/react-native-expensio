@@ -1,4 +1,4 @@
-import { CategoryCard } from "@/components";
+import { CategoryCard, SpendingChart } from "@/components";
 import type { IconName } from "@/components/CategoryCard/icon-map";
 import { useTheme } from "@/hooks/useTheme";
 import { BlurView } from "expo-blur";
@@ -98,9 +98,8 @@ const HomeScreen = () => {
       <View style={styles(colors).content}>
         {/* spending chart */}
         <View style={styles(colors).section}>
-          <Text style={styles(colors).sectionTitle}>
-            This month&apos;s spending
-          </Text>
+          <Text style={styles(colors).sectionTitle}>Weekly Spending</Text>
+          <SpendingChart colors={colors} />
         </View>
 
         {/* categories */}
