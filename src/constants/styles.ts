@@ -201,6 +201,5 @@ export const GlobalColors = {
 export const GlobalStyles = StyleSheet.create({
   screenContainer: {
     flex: 1,
-    backgroundColor: GlobalColors.gray[100],
   },
 });
