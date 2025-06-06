@@ -1,8 +1,10 @@
+import { CategoryCard } from "@/components";
+import type { IconName } from "@/components/CategoryCard/icon-map";
 import { useTheme } from "@/hooks/useTheme";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { User } from "lucide-react-native";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -11,15 +13,36 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { expenseCategories, incomeCategories } from "./mock-data";
 
 const HomeScreen = () => {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-  const [totalBalance] = useState(4850.0);
-  const [monthlyExpenses] = useState(1249.5);
-  const [monthlyIncome] = useState(3500.0);
   const [isAddExpenseModalVisible, setIsAddExpenseModalVisible] =
     useState(false);
+
+  const monthlyExpenses = useMemo(
+    () =>
+      expenseCategories.reduce(
+        (sum, category) => sum + category.monthlySpend,
+        0
+      ),
+    []
+  );
+
+  const monthlyIncome = useMemo(
+    () =>
+      incomeCategories.reduce(
+        (sum, category) => sum + category.monthlyIncome,
+        0
+      ),
+    []
+  );
+
+  const totalBalance = useMemo(
+    () => monthlyIncome - monthlyExpenses,
+    [monthlyIncome, monthlyExpenses]
+  );
 
   return (
     <ScrollView style={styles(colors).container}>
@@ -83,6 +106,15 @@ const HomeScreen = () => {
         {/* categories */}
         <View style={styles(colors).section}>
           <Text style={styles(colors).sectionTitle}>Categories</Text>
+          {expenseCategories.slice(0, 4).map((category) => (
+            <CategoryCard
+              key={category.name}
+              name={category.name as IconName}
+              totalSpend={category.totalSpend}
+              monthlySpend={category.monthlySpend}
+              colors={colors}
+            />
+          ))}
         </View>
 
         {/* recent transactions */}
