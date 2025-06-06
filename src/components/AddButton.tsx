@@ -8,7 +8,8 @@ export const AddButton = () => {
   return (
     <TouchableOpacity style={styles(colors).button}>
       <Plus
-        size={24}
+        size={32}
+        strokeWidth={3}
         color="white"
       />
     </TouchableOpacity>
@@ -21,7 +22,7 @@ const styles = (colors: any) =>
       backgroundColor: colors.primary[500],
       position: "absolute",
       top: -20,
-      left: "50%",
+      left: "55%",
       transform: [{ translateX: -40 }],
       width: 70,
       height: 70,
