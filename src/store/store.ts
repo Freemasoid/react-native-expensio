@@ -11,14 +11,17 @@ import {
   REHYDRATE,
 } from "redux-persist";
 import themeReducer from "./slices/themeSlice";
+import transactionReducer from "./slices/transactionSlice";
 
 const persistConfig = {
   key: "root",
   storage: AsyncStorage,
+  whitelist: ["transactions", "theme"],
 };
 
 const rootReducer = combineReducers({
   theme: themeReducer,
+  transaction: transactionReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
