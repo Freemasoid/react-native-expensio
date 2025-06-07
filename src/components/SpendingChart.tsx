@@ -53,6 +53,7 @@ const SpendingChart: React.FC<SpendingChartProps> = ({ colors }) => {
               color={colors.primary[600]}
               roundedCorners={{ topLeft: 8, topRight: 8 }}
               innerPadding={0.3}
+              labels={{ font: font, position: "top" }}
             />
           )}
         </CartesianChart>
