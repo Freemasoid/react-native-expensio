@@ -7,7 +7,7 @@ import { User } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { expenseCategories, incomeCategories } from "./mock-data";
+import { transactionData } from "./mock-data";
 import { styles } from "./styles";
 
 const HomeScreen = () => {
@@ -16,28 +16,54 @@ const HomeScreen = () => {
   const [isAddExpenseModalVisible, setIsAddExpenseModalVisible] =
     useState(false);
 
-  const monthlyExpenses = useMemo(
-    () =>
-      expenseCategories.reduce(
-        (sum, category) => sum + category.monthlySpend,
-        0
-      ),
-    []
-  );
+  const date = new Date();
+  const year = date.getFullYear().toString();
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
 
-  const monthlyIncome = useMemo(
-    () =>
-      incomeCategories.reduce(
-        (sum, category) => sum + category.monthlyIncome,
-        0
-      ),
-    []
-  );
+  const currentMonthTransactions =
+    transactionData.transactions[year]?.[month] || [];
 
-  const totalBalance = useMemo(
-    () => monthlyIncome - monthlyExpenses,
-    [monthlyIncome, monthlyExpenses]
-  );
+  const monthlyIncome = useMemo(() => {
+    return currentMonthTransactions
+      .filter((transaction) => transaction.type === "income")
+      .reduce((sum, transaction) => sum + transaction.amount, 0);
+  }, [currentMonthTransactions]);
+
+  const monthlyExpenses = useMemo(() => {
+    return currentMonthTransactions
+      .filter((transaction) => transaction.type === "expense")
+      .reduce((sum, transaction) => sum + transaction.amount, 0);
+  }, [currentMonthTransactions]);
+
+  const totalBalance = useMemo(() => {
+    return monthlyIncome - monthlyExpenses;
+  }, [monthlyExpenses, monthlyIncome]);
+
+  const expenseCategories = useMemo(() => {
+    const currentYearCategories = transactionData.categorySummaries[year];
+    if (!currentYearCategories) return [];
+
+    const expenseCategories = Object.values(currentYearCategories).filter(
+      (category) => category.name !== "income"
+    );
+
+    // Calculate total monthly spend across all expense categories
+    const totalMonthlySpend = expenseCategories.reduce(
+      (sum, category) =>
+        sum + (category.monthlyBreakdown[month]?.monthlySpend || 0),
+      0
+    );
+
+    return expenseCategories
+      .map((category) => ({
+        name: category.name,
+        monthlySpend: category.monthlyBreakdown[month]?.monthlySpend || 0,
+        totalSpend: totalMonthlySpend,
+        transactionCount:
+          category.monthlyBreakdown[month]?.transactionCount || 0,
+      }))
+      .sort((a, b) => b.monthlySpend - a.monthlySpend);
+  }, [year, month]);
 
   return (
     <ScrollView style={styles(colors).container}>
