@@ -1,4 +1,5 @@
-import { CategoryCard } from "./CategoryCard/CategoryCard";
+import { CategoryCard } from "./CategoryCard";
 import SpendingChart from "./SpendingChart";
+import TransactionItem from "./TransactionItem";
 
-export { CategoryCard, SpendingChart };
+export { CategoryCard, SpendingChart, TransactionItem };

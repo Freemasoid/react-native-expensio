@@ -8,7 +8,7 @@ interface CategoryIconProps {
   color?: string;
 }
 
-export const CategoryIcon: React.FC<CategoryIconProps> = ({
+const CategoryIcon: React.FC<CategoryIconProps> = ({
   name,
   size = 24,
   color = "#FFFFFF",
@@ -33,3 +33,5 @@ export const CategoryIcon: React.FC<CategoryIconProps> = ({
     />
   );
 };
+
+export default CategoryIcon;

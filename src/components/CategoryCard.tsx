@@ -1,8 +1,8 @@
 import { GlobalColors } from "@/constants/styles";
 import React from "react";
 import { Platform, StyleSheet, Text, View } from "react-native";
-import { CategoryIcon } from "./CategoryIcon";
-import type { IconName } from "./icon-map";
+import { CategoryIcon } from "./ui";
+import type { IconName } from "./ui/CategoryIcon/icon-map";
 
 interface CategoryCardProps {
   name: IconName;
