@@ -1,6 +1,17 @@
-# Expensio 🪄
+# Expensio 🪄💰
+
+#### Makes managing your expenses so easy - you will think, it's magic!
 
 A modern, intuitive expense tracking mobile application built with React Native, TypeScript, and Redux. Track your spending, manage your budget, and gain insights into your financial habits with beautiful visualizations and seamless user experience.
+
+<table>
+<tr>
+<td><img src="./assets/app-showcase/myappTheme.png" alt="myappTheme" width="300"/><td>
+</tr>
+<tr>
+<td><img src="./assets/app-showcase/myapp1.gif" alt="myapp1" width="300"/><td>
+</tr>
+</table>
 
 ## 🚀 Features
 
