@@ -1,25 +1,8 @@
+import type { Transaction, YearlyTransactions } from "@/types/types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
-interface Transaction {
-  id: string;
-  title: string;
-  amount: number;
-  type: "expense" | "income";
-  category: string;
-  date: Date;
-  description: string;
-}
 
 interface TransactionState {
   transactions: YearlyTransactions;
-}
-
-interface MonthlyTransactions {
-  [month: string]: Transaction[];
-}
-
-interface YearlyTransactions {
-  [year: string]: MonthlyTransactions;
 }
 
 const initialState: TransactionState = {

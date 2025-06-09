@@ -1,46 +1,4 @@
-interface Transaction {
-  id: number;
-  title: string;
-  category: string;
-  amount: number;
-  type: "expense" | "income";
-  date: string;
-  description: string;
-}
-
-interface MonthlyTransactions {
-  [month: string]: Transaction[];
-}
-
-interface YearlyTransactions {
-  [year: string]: MonthlyTransactions;
-}
-
-interface CategorySummary {
-  name: string;
-  monthlySpend: number;
-  transactionCount: number;
-  lastUpdated: string;
-}
-
-interface YearlyCategorySummary {
-  [category: string]: {
-    name: string;
-    yearlySpend: number;
-    monthlyBreakdown: {
-      [month: string]: CategorySummary;
-    };
-  };
-}
-
-interface TransactionData {
-  totalSpend: number;
-  totalIncome: number;
-  transactions: YearlyTransactions;
-  categorySummaries: {
-    [year: string]: YearlyCategorySummary;
-  };
-}
+import { TransactionData } from "@/types/types";
 
 const transactionData: TransactionData = {
   totalSpend: 0,
@@ -49,7 +7,7 @@ const transactionData: TransactionData = {
     "2025": {
       "06": [
         {
-          id: 1,
+          id: "1",
           title: "Grocery Store",
           category: "food",
           amount: 85.5,
@@ -58,7 +16,7 @@ const transactionData: TransactionData = {
           description: "Groceries for the week",
         },
         {
-          id: 2,
+          id: "2",
           title: "Uber Ride",
           category: "transport",
           amount: 12.0,
@@ -67,7 +25,7 @@ const transactionData: TransactionData = {
           description: "Uber ride to the office",
         },
         {
-          id: 3,
+          id: "3",
           title: "Netflix Subscription",
           category: "entertainment",
           amount: 15.99,
@@ -76,7 +34,7 @@ const transactionData: TransactionData = {
           description: "Netflix subscription",
         },
         {
-          id: 4,
+          id: "4",
           title: "Salary",
           category: "income",
           amount: 3500.0,
@@ -85,7 +43,7 @@ const transactionData: TransactionData = {
           description: "Monthly salary",
         },
         {
-          id: 5,
+          id: "5",
           title: "Starbucks Coffee",
           category: "coffee",
           amount: 4.95,
@@ -94,7 +52,7 @@ const transactionData: TransactionData = {
           description: "Starbucks coffee",
         },
         {
-          id: 6,
+          id: "6",
           title: "PlayStation Plus",
           category: "gaming",
           amount: 59.99,
@@ -103,7 +61,7 @@ const transactionData: TransactionData = {
           description: "PlayStation Plus subscription",
         },
         {
-          id: 7,
+          id: "7",
           title: "Flight to Paris",
           category: "travel",
           amount: 450.0,
@@ -112,7 +70,7 @@ const transactionData: TransactionData = {
           description: "Flight to Paris",
         },
         {
-          id: 8,
+          id: "8",
           title: "Doctor Visit",
           category: "health",
           amount: 120.0,
@@ -121,7 +79,7 @@ const transactionData: TransactionData = {
           description: "Doctor visit",
         },
         {
-          id: 9,
+          id: "9",
           title: "Zara Shopping",
           category: "shopping",
           amount: 129.99,
@@ -130,7 +88,7 @@ const transactionData: TransactionData = {
           description: "Zara shopping",
         },
         {
-          id: 10,
+          id: "10",
           title: "Rent Payment",
           category: "home",
           amount: 1200.0,
@@ -139,7 +97,7 @@ const transactionData: TransactionData = {
           description: "Rent payment",
         },
         {
-          id: 11,
+          id: "11",
           title: "Freelance Project",
           category: "income",
           amount: 800.0,
@@ -148,7 +106,7 @@ const transactionData: TransactionData = {
           description: "Freelance project",
         },
         {
-          id: 12,
+          id: "12",
           title: "Dental Checkup",
           category: "health",
           amount: 85.0,
@@ -157,7 +115,7 @@ const transactionData: TransactionData = {
           description: "Dental checkup",
         },
         {
-          id: 13,
+          id: "13",
           title: "Restaurant Dinner",
           category: "food",
           amount: 65.0,
@@ -166,7 +124,7 @@ const transactionData: TransactionData = {
           description: "Dinner at Italian restaurant",
         },
         {
-          id: 14,
+          id: "14",
           title: "Train Ticket",
           category: "transport",
           amount: 25.0,
@@ -175,7 +133,7 @@ const transactionData: TransactionData = {
           description: "Train ticket to city center",
         },
         {
-          id: 15,
+          id: "15",
           title: "Movie Tickets",
           category: "entertainment",
           amount: 24.0,
@@ -184,7 +142,7 @@ const transactionData: TransactionData = {
           description: "Movie tickets for two",
         },
         {
-          id: 16,
+          id: "16",
           title: "Local Cafe",
           category: "coffee",
           amount: 3.5,
@@ -193,7 +151,7 @@ const transactionData: TransactionData = {
           description: "Morning coffee at local cafe",
         },
         {
-          id: 17,
+          id: "17",
           title: "Xbox Game",
           category: "gaming",
           amount: 49.99,
@@ -202,7 +160,7 @@ const transactionData: TransactionData = {
           description: "New Xbox game purchase",
         },
         {
-          id: 18,
+          id: "18",
           title: "Hotel Booking",
           category: "travel",
           amount: 200.0,
@@ -211,7 +169,7 @@ const transactionData: TransactionData = {
           description: "Hotel booking for weekend trip",
         },
         {
-          id: 19,
+          id: "19",
           title: "H&M Shopping",
           category: "shopping",
           amount: 89.99,
@@ -220,7 +178,7 @@ const transactionData: TransactionData = {
           description: "Clothes shopping at H&M",
         },
         {
-          id: 20,
+          id: "20",
           title: "Electricity Bill",
           category: "home",
           amount: 85.0,
