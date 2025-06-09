@@ -1,6 +1,7 @@
 import { CategoryCard, SpendingChart, TransactionItem } from "@/components";
 import type { IconName } from "@/components/ui/CategoryIcon/icon-map";
 import { useTheme } from "@/hooks/useTheme";
+import { useAppSelector } from "@/store/hooks";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { User } from "lucide-react-native";
@@ -12,6 +13,7 @@ import { styles } from "./styles";
 
 const HomeScreen = () => {
   const { colors } = useTheme();
+  const currentTheme = useAppSelector((state) => state.theme.currentTheme);
   const insets = useSafeAreaInsets();
   const [isAddExpenseModalVisible, setIsAddExpenseModalVisible] =
     useState(false);
@@ -68,7 +70,11 @@ const HomeScreen = () => {
   return (
     <ScrollView style={styles(colors).container}>
       <LinearGradient
-        colors={[colors.primary[500], colors.primary_accent[500]]}
+        colors={
+          currentTheme === "primaryYellow"
+            ? [colors.primary[300], colors.primary_accent[300]]
+            : [colors.primary[500], colors.primary_accent[500]]
+        }
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
         style={[styles(colors).header, { paddingTop: insets.top }]}
