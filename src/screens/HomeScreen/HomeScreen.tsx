@@ -1,5 +1,5 @@
-import { CategoryCard, SpendingChart } from "@/components";
-import type { IconName } from "@/components/CategoryCard/icon-map";
+import { CategoryCard, SpendingChart, TransactionItem } from "@/components";
+import type { IconName } from "@/components/ui/CategoryIcon/icon-map";
 import { useTheme } from "@/hooks/useTheme";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
@@ -144,6 +144,19 @@ const HomeScreen = () => {
             <TouchableOpacity>
               <Text style={styles(colors).seeAllButton}>See All</Text>
             </TouchableOpacity>
+          </View>
+
+          <View style={styles(colors).transactionsList}>
+            {currentMonthTransactions
+              .slice(0, 4)
+              .map((transaction, index, array) => (
+                <TransactionItem
+                  key={transaction.id}
+                  data={transaction}
+                  colors={colors}
+                  isLast={index === array.length - 1}
+                />
+              ))}
           </View>
         </View>
       </View>

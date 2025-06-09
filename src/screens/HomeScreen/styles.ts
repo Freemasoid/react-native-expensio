@@ -1,4 +1,5 @@
-import { StyleSheet } from "react-native";
+import { GlobalColors } from "@/constants/styles";
+import { Platform, StyleSheet } from "react-native";
 
 export const styles = (colors: any) =>
   StyleSheet.create({
@@ -91,5 +92,21 @@ export const styles = (colors: any) =>
       color: colors.primary[600],
       fontSize: 14,
       fontWeight: "500",
+    },
+    transactionsList: {
+      backgroundColor: GlobalColors.gray[100],
+      borderRadius: 24,
+      marginBottom: 14,
+      borderColor: "black",
+      ...(Platform.OS === "ios" && {
+        shadowColor: GlobalColors.gray[900],
+        shadowOffset: {
+          width: 0,
+          height: 4,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3,
+      }),
+      elevation: Platform.OS === "android" ? 3 : 0,
     },
   });

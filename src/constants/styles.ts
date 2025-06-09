@@ -196,6 +196,8 @@ export const GlobalColors = {
     800: "#666666",
     900: "#000000",
   },
+  green: "#4ca154",
+  red: "#ca3a31",
 };
 
 export const GlobalStyles = StyleSheet.create({
