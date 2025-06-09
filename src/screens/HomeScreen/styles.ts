@@ -89,7 +89,7 @@ export const styles = (colors: any) =>
       marginBottom: 16,
     },
     seeAllButton: {
-      color: colors.primary[600],
+      color: colors.primary[400],
       fontSize: 14,
       fontWeight: "500",
     },
