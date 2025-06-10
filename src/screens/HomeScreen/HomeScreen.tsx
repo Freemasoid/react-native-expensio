@@ -8,7 +8,7 @@ import { User } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { transactionData } from "./mock-data";
+import { transactionData } from "../../constants/mock-data";
 import { styles } from "./styles";
 
 const HomeScreen = () => {
