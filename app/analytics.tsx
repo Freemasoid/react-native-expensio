@@ -1,12 +1,15 @@
-import { Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { GlobalStyles } from "@/constants/styles";
+import AnalyticsScreen from "@/screens/AnalyticsScreen";
+import { StatusBar, View } from "react-native";
 
 const Analytics = () => {
-  const insets = useSafeAreaInsets();
-
   return (
-    <View style={[{ paddingTop: insets.top }]}>
-      <Text>Analytics</Text>
+    <View style={[GlobalStyles.screenContainer]}>
+      <StatusBar
+        barStyle="light-content"
+        hidden={false}
+      />
+      <AnalyticsScreen />
     </View>
   );
 };
