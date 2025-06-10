@@ -25,13 +25,13 @@ export const styles = (colors: any) =>
     },
     subtitle: {
       fontSize: 16,
-      color: "rgba(255, 255, 255, 0.8)",
+      color: GlobalColors.gray[200],
     },
     avatarContainer: {
       width: 48,
       height: 48,
       borderRadius: 24,
-      backgroundColor: "rgba(255, 255, 255, 0.2)",
+      backgroundColor: GlobalColors.gray[700],
       justifyContent: "center",
       alignItems: "center",
     },
@@ -42,7 +42,7 @@ export const styles = (colors: any) =>
     },
     balanceLabel: {
       fontSize: 18,
-      color: "rgba(255, 255, 255, 0.8)",
+      color: GlobalColors.gray[200],
       marginBottom: 8,
     },
     balanceAmount: {
@@ -57,7 +57,7 @@ export const styles = (colors: any) =>
     },
     balanceDetailLabel: {
       fontSize: 16,
-      color: "rgba(255, 255, 255, 0.8)",
+      color: GlobalColors.gray[200],
     },
     incomeAmount: {
       fontSize: 18,
