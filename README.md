@@ -7,6 +7,7 @@ A modern, intuitive expense tracking mobile application built with React Native,
 <table>
 <tr>
 <td><img src="./assets/app-showcase/myappTheme.png" alt="myappTheme" width="300"/><td>
+<td><img src="./assets/app-showcase/myappAnalytics.png" alt="myappAnalytics" width="300"/><td>
 </tr>
 <tr>
 <td><img src="./assets/app-showcase/myapp1.gif" alt="myapp1" width="300"/><td>
