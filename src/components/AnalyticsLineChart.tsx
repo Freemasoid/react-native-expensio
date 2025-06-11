@@ -27,7 +27,7 @@ const AnalyticsLineChart: React.FC<AnalyticsLineChartProps> = ({
     const monthlyExpenses: { [month: string]: number } = {};
 
     const months = Array.from({ length: currentMonth + 1 }, (_, i) =>
-      String(i + 1).padStart(2, "0")
+      String(i + 1).padStart(2, "0"),
     );
 
     const allMonthNames = [
@@ -60,9 +60,9 @@ const AnalyticsLineChart: React.FC<AnalyticsLineChartProps> = ({
             if (months.includes(month)) {
               monthlyExpenses[month] += monthData.monthlySpend;
             }
-          }
+          },
         );
-      }
+      },
     );
 
     return months.map((month, index) => ({
@@ -115,7 +115,7 @@ const AnalyticsLineChart: React.FC<AnalyticsLineChartProps> = ({
           {Math.max(...chartData.map((d) => d.y)).toLocaleString()} € in{" "}
           {
             chartData.find(
-              (d) => d.y === Math.max(...chartData.map((d) => d.y))
+              (d) => d.y === Math.max(...chartData.map((d) => d.y)),
             )?.x
           }
         </Text>
