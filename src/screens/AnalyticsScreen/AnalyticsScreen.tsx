@@ -1,4 +1,4 @@
-import { AnalyticsLineChart } from "@/components";
+import { AnalyticsLineChart, AnalyticsPieChart } from "@/components";
 import { transactionData } from "@/constants/mock-data";
 import { useTheme } from "@/hooks/useTheme";
 import { useAppSelector } from "@/store/hooks";
@@ -39,10 +39,11 @@ const AnalyticsScreen = () => {
       </LinearGradient>
 
       <View style={styles(colors).content}>
-        <AnalyticsLineChart
-          data={transactionData}
-          colors={colors}
-        />
+        <AnalyticsLineChart data={transactionData} colors={colors} />
+      </View>
+
+      <View style={styles(colors).content}>
+        <AnalyticsPieChart data={transactionData} colors={colors} />
       </View>
     </ScrollView>
   );
