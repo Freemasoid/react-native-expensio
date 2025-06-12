@@ -1,12 +1,15 @@
-import { Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { GlobalStyles } from "@/constants/styles";
+import ProfileScreen from "@/screens/ProfileScreen";
+import { StatusBar, View } from "react-native";
 
 const Profile = () => {
-  const insets = useSafeAreaInsets();
-
   return (
-    <View style={[{ paddingTop: insets.top }]}>
-      <Text>Profile</Text>
+    <View style={[GlobalStyles.screenContainer]}>
+      <StatusBar
+        barStyle="light-content"
+        hidden={false}
+      />
+      <ProfileScreen />
     </View>
   );
 };
