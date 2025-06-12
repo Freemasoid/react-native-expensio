@@ -10,6 +10,7 @@ import {
   REGISTER,
   REHYDRATE,
 } from "redux-persist";
+import cardsReducer from "./slices/cardsSlice";
 import themeReducer from "./slices/themeSlice";
 import transactionReducer from "./slices/transactionSlice";
 import userReducer from "./slices/userSlice";
@@ -17,13 +18,14 @@ import userReducer from "./slices/userSlice";
 const persistConfig = {
   key: "root",
   storage: AsyncStorage,
-  whitelist: ["transactions", "theme", "user"],
+  whitelist: ["transactions", "theme", "user", "cards"],
 };
 
 const rootReducer = combineReducers({
   theme: themeReducer,
   transaction: transactionReducer,
   user: userReducer,
+  cards: cardsReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
