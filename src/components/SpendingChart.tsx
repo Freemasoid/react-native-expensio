@@ -69,16 +69,17 @@ const styles = (colors: any) =>
       borderRadius: 24,
       padding: 20,
       marginBottom: 14,
+      borderColor: "transparent",
       ...(Platform.OS === "ios" && {
         shadowColor: GlobalColors.gray[900],
         shadowOffset: {
           width: 0,
-          height: 4,
+          height: 2,
         },
-        shadowOpacity: 0.25,
-        shadowRadius: 3,
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
       }),
-      elevation: Platform.OS === "android" ? 3 : 0,
+      elevation: Platform.OS === "android" ? 2 : 0,
     },
     chartContainer: {
       height: 200,
