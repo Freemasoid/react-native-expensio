@@ -12,16 +12,18 @@ import {
 } from "redux-persist";
 import themeReducer from "./slices/themeSlice";
 import transactionReducer from "./slices/transactionSlice";
+import userReducer from "./slices/userSlice";
 
 const persistConfig = {
   key: "root",
   storage: AsyncStorage,
-  whitelist: ["transactions", "theme"],
+  whitelist: ["transactions", "theme", "user"],
 };
 
 const rootReducer = combineReducers({
   theme: themeReducer,
   transaction: transactionReducer,
+  user: userReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
