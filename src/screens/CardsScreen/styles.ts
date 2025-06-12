@@ -32,4 +32,13 @@ export const styles = (colors: any) =>
       paddingHorizontal: 24,
       marginTop: 24,
     },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingBottom: 20,
+    },
+    bottomSpacing: {
+      height: 20,
+    },
   });
