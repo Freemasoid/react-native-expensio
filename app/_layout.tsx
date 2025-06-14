@@ -1,9 +1,11 @@
 import { AddButton } from "@/components/layout";
+import { ModalProvider, useModal } from "@/contexts";
 import { useTheme } from "@/hooks/useTheme";
 import { persistor, store } from "@/store/store";
 import { PlatformPressable } from "@react-navigation/elements";
 import { Tabs } from "expo-router";
 import { ChartPie, CreditCard, Home, User } from "lucide-react-native";
+import React from "react";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 
@@ -14,7 +16,9 @@ export default function RootLayout() {
         loading={null}
         persistor={persistor}
       >
-        <TabsLayout />
+        <ModalProvider>
+          <TabsLayout />
+        </ModalProvider>
       </PersistGate>
     </Provider>
   );
@@ -22,6 +26,10 @@ export default function RootLayout() {
 
 function TabsLayout() {
   const { colors } = useTheme();
+  const { openAddExpenseModal } = useModal();
+
+  // Custom AddButton wrapper that includes the onPress functionality
+  const CustomAddButton = () => <AddButton onPress={openAddExpenseModal} />;
 
   return (
     <Tabs
@@ -66,13 +74,7 @@ function TabsLayout() {
       <Tabs.Screen
         name="addButton"
         options={{
-          tabBarButton: AddButton,
-        }}
-        listeners={{
-          tabPress: (e) => {
-            e.preventDefault();
-            console.log("tabPress");
-          },
+          tabBarButton: CustomAddButton,
         }}
       />
 
