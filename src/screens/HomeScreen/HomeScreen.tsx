@@ -1,7 +1,8 @@
+import { USER_ID } from "@env";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { User } from "lucide-react-native";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -11,7 +12,8 @@ import type { IconName } from "@/components/ui/CategoryIcon/icon-map";
 import { useModal } from "@/contexts";
 import { useTheme } from "@/hooks/useTheme";
 import { useAppSelector } from "@/store/hooks";
-import { transactionData } from "../../constants/mock-data";
+import { Transaction, YearlyCategorySummary } from "@/types/types";
+import { getUserExpenses } from "@/utils/api";
 import { styles } from "./styles";
 
 const HomeScreen = () => {
@@ -19,24 +21,48 @@ const HomeScreen = () => {
   const currentTheme = useAppSelector((state) => state.theme.currentTheme);
   const insets = useSafeAreaInsets();
   const { isAddExpenseModalVisible, closeAddExpenseModal } = useModal();
+  const [transactions, setTransactions] = useState<any>(null);
+
+  useEffect(() => {
+    async function getTransactions() {
+      try {
+        const response = await getUserExpenses(USER_ID);
+        setTransactions(response.data);
+      } catch (err) {
+        console.error("Failed to fetch transactions:", err);
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to fetch transactions";
+        console.error(errorMessage);
+      }
+    }
+
+    getTransactions();
+  }, []);
 
   const date = new Date();
   const year = date.getFullYear().toString();
   const month = (date.getMonth() + 1).toString().padStart(2, "0");
 
-  const currentMonthTransactions =
-    transactionData.transactions[year]?.[month] || [];
+  const currentMonthTransactions: Transaction[] = useMemo(() => {
+    return transactions?.transactions?.[year]?.[month] || [];
+  }, [transactions, year, month]);
 
   const monthlyIncome = useMemo(() => {
     return currentMonthTransactions
-      .filter((transaction) => transaction.type === "income")
-      .reduce((sum, transaction) => sum + transaction.amount, 0);
+      .filter((transaction: Transaction) => transaction.type === "income")
+      .reduce(
+        (sum: number, transaction: Transaction) => sum + transaction.amount,
+        0
+      );
   }, [currentMonthTransactions]);
 
   const monthlyExpenses = useMemo(() => {
     return currentMonthTransactions
-      .filter((transaction) => transaction.type === "expense")
-      .reduce((sum, transaction) => sum + transaction.amount, 0);
+      .filter((transaction: Transaction) => transaction.type === "expense")
+      .reduce(
+        (sum: number, transaction: Transaction) => sum + transaction.amount,
+        0
+      );
   }, [currentMonthTransactions]);
 
   const totalBalance = useMemo(() => {
@@ -44,10 +70,13 @@ const HomeScreen = () => {
   }, [monthlyExpenses, monthlyIncome]);
 
   const expenseCategories = useMemo(() => {
-    const currentYearCategories = transactionData.categorySummaries[year];
-    if (!currentYearCategories) return [];
+    const categorySummaries: YearlyCategorySummary =
+      transactions?.categorySummaries?.[year];
 
-    const expenseCategories = Object.values(currentYearCategories).filter(
+    if (!categorySummaries) return [];
+
+    const categoryValues = Object.values(categorySummaries);
+    const expenseCategories = categoryValues.filter(
       (category) => category.name !== "income"
     );
 
@@ -67,7 +96,7 @@ const HomeScreen = () => {
           category.monthlyBreakdown[month]?.transactionCount || 0,
       }))
       .sort((a, b) => b.monthlySpend - a.monthlySpend);
-  }, [year, month]);
+  }, [year, month, transactions]);
 
   return (
     <>
