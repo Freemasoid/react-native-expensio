@@ -53,8 +53,10 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@types/react": "~19.0.10",
+    "@types/react-native-dotenv": "^0.2.2",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~9.2.0",
+    "eslint-import-resolver-babel-module": "^5.3.2",
     "typescript": "~5.8.3"
   },
   "private": true
