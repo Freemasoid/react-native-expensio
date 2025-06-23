@@ -7,7 +7,7 @@ import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CategoryCard, SpendingChart, TransactionItem } from "@/components";
-import { AddExpenseModal } from "@/components/modals";
+import { AddTransactionModal } from "@/components/modals";
 import type { IconName } from "@/components/ui/CategoryIcon/icon-map";
 import { useModal } from "@/contexts";
 import { useTheme } from "@/hooks/useTheme";
@@ -20,7 +20,7 @@ const HomeScreen = () => {
   const { colors } = useTheme();
   const currentTheme = useAppSelector((state) => state.theme.currentTheme);
   const insets = useSafeAreaInsets();
-  const { isAddExpenseModalVisible, closeAddExpenseModal } = useModal();
+  const { isAddTransactionModalVisible, closeAddTransactionModal } = useModal();
   const [transactions, setTransactions] = useState<any>(null);
 
   useEffect(() => {
@@ -205,9 +205,9 @@ const HomeScreen = () => {
       </ScrollView>
 
       {/* Add Expense Modal */}
-      <AddExpenseModal
-        isVisible={isAddExpenseModalVisible}
-        onClose={closeAddExpenseModal}
+      <AddTransactionModal
+        isVisible={isAddTransactionModalVisible}
+        onClose={closeAddTransactionModal}
       />
     </>
   );

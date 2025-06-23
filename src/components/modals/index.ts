@@ -1,1 +1,1 @@
-export { AddExpenseModal } from "./AddExpenseModal";
+export { AddTransactionModal } from "./AddTransactionModal";
