@@ -25,12 +25,12 @@ import { useTheme } from "@/hooks/useTheme";
 import { useAppDispatch } from "@/store/hooks";
 import { addTransaction } from "@/store/slices/transactionSlice";
 
-interface AddExpenseModalProps {
+interface AddTransactionModalProps {
   isVisible: boolean;
   onClose: () => void;
 }
 
-export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
+export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   isVisible,
   onClose,
 }) => {
@@ -47,6 +47,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
     amount?: string;
     category?: string;
   }>({});
+  const [transactionType, setTransactionType] = useState("expense");
 
   const categories = [
     "Food",

@@ -23,7 +23,7 @@ const Tab = createBottomTabNavigator();
 
 function TabNavigator() {
   const { colors } = useTheme();
-  const { openAddExpenseModal } = useModal();
+  const { openAddTransactionModal } = useModal();
 
   return (
     <Tab.Navigator
@@ -77,7 +77,7 @@ function TabNavigator() {
       <Tab.Screen
         name="Add"
         options={{
-          tabBarButton: () => <AddButton onPress={openAddExpenseModal} />,
+          tabBarButton: () => <AddButton onPress={openAddTransactionModal} />,
         }}
       >
         {() => null}

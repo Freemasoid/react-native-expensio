@@ -1,10 +1,10 @@
 import React, { createContext, ReactNode, useContext, useState } from "react";
 
 interface ModalContextType {
-  isAddExpenseModalVisible: boolean;
-  setIsAddExpenseModalVisible: (visible: boolean) => void;
-  openAddExpenseModal: () => void;
-  closeAddExpenseModal: () => void;
+  isAddTransactionModalVisible: boolean;
+  setIsAddTransactionModalVisible: (visible: boolean) => void;
+  openAddTransactionModal: () => void;
+  closeAddTransactionModal: () => void;
 }
 
 const ModalContext = createContext<ModalContextType | undefined>(undefined);
@@ -14,17 +14,17 @@ interface ModalProviderProps {
 }
 
 export const ModalProvider: React.FC<ModalProviderProps> = ({ children }) => {
-  const [isAddExpenseModalVisible, setIsAddExpenseModalVisible] =
+  const [isAddTransactionModalVisible, setIsAddTransactionModalVisible] =
     useState(false);
 
-  const openAddExpenseModal = () => setIsAddExpenseModalVisible(true);
-  const closeAddExpenseModal = () => setIsAddExpenseModalVisible(false);
+  const openAddTransactionModal = () => setIsAddTransactionModalVisible(true);
+  const closeAddTransactionModal = () => setIsAddTransactionModalVisible(false);
 
   const value: ModalContextType = {
-    isAddExpenseModalVisible,
-    setIsAddExpenseModalVisible,
-    openAddExpenseModal,
-    closeAddExpenseModal,
+    isAddTransactionModalVisible,
+    setIsAddTransactionModalVisible,
+    openAddTransactionModal,
+    closeAddTransactionModal,
   };
 
   return (
