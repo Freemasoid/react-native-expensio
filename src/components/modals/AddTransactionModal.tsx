@@ -1,3 +1,6 @@
+import { GlobalColors } from "@/constants/styles";
+import { useTheme } from "@/hooks/useTheme";
+import { useAppDispatch } from "@/store/hooks";
 import {
   Calendar,
   DollarSign,
@@ -18,12 +21,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-import { GlobalColors } from "@/constants/styles";
-import { useTheme } from "@/hooks/useTheme";
-import { useAppDispatch } from "@/store/hooks";
-import { addTransaction } from "@/store/slices/transactionSlice";
+import { Dropdown } from "react-native-element-dropdown";
 
 interface AddTransactionModalProps {
   isVisible: boolean;
@@ -36,7 +34,6 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 }) => {
   const { colors } = useTheme();
   const dispatch = useAppDispatch();
-  const insets = useSafeAreaInsets();
 
   // Form state
   const [amount, setAmount] = useState("");
@@ -104,7 +101,8 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       description: description || `${category} expense`,
     };
 
-    dispatch(addTransaction(transaction));
+    console.log(transaction);
+
     resetForm();
     onClose();
   };
@@ -148,7 +146,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                   color="white"
                 />
               </View>
-              <Text style={styles(colors).headerTitle}>Add Expense</Text>
+              <Text style={styles(colors).headerTitle}>Add Transaction</Text>
             </View>
             <TouchableOpacity
               style={styles(colors).closeButton}
@@ -169,6 +167,49 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
+          {/* Action Buttons - Now inside ScrollView */}
+          <View style={styles(colors).typeSelectionButtons}>
+            <TouchableOpacity
+              style={
+                transactionType === "expense"
+                  ? styles(colors).activeTypeButton
+                  : styles(colors).inactiveTypeButton
+              }
+              onPress={() => setTransactionType("expense")}
+              activeOpacity={0.7}
+            >
+              <Text
+                style={
+                  transactionType === "expense"
+                    ? styles(colors).activeButtonText
+                    : styles(colors).inactiveButtonText
+                }
+              >
+                Expense
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={
+                transactionType === "income"
+                  ? styles(colors).activeTypeButton
+                  : styles(colors).inactiveTypeButton
+              }
+              onPress={() => setTransactionType("income")}
+              activeOpacity={0.8}
+            >
+              <Text
+                style={
+                  transactionType === "income"
+                    ? styles(colors).activeButtonText
+                    : styles(colors).inactiveButtonText
+                }
+              >
+                Income
+              </Text>
+            </TouchableOpacity>
+          </View>
+
           {/* Amount Input */}
           <View style={styles(colors).inputSection}>
             <View style={styles(colors).labelContainer}>
@@ -196,46 +237,32 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
           </View>
 
           {/* Category Selection */}
-          <View style={styles(colors).inputSection}>
-            <View style={styles(colors).labelContainer}>
-              <Tag
-                size={20}
-                color={colors.primary[500]}
+          {transactionType === "expense" && (
+            <View style={styles(colors).inputSection}>
+              <View style={styles(colors).labelContainer}>
+                <Tag
+                  size={20}
+                  color={colors.primary[500]}
+                />
+                <Text style={styles(colors).label}>Category *</Text>
+              </View>
+
+              <Dropdown
+                style={styles(colors).dropdown}
+                containerStyle={styles(colors).dropdownContainer}
+                data={categories.map((cat) => ({ label: cat, value: cat }))}
+                search
+                searchPlaceholder="Search..."
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                value={category}
+                onChange={(item) => {
+                  setCategory(item.value);
+                }}
               />
-              <Text style={styles(colors).label}>Category *</Text>
             </View>
-            <View style={styles(colors).categoryGrid}>
-              {categories.map((cat) => (
-                <TouchableOpacity
-                  key={cat}
-                  style={[
-                    styles(colors).categoryButton,
-                    category === cat && styles(colors).categoryButtonSelected,
-                  ]}
-                  onPress={() => {
-                    setCategory(cat);
-                    if (errors.category) {
-                      setErrors((prev) => ({ ...prev, category: undefined }));
-                    }
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <Text
-                    style={[
-                      styles(colors).categoryButtonText,
-                      category === cat &&
-                        styles(colors).categoryButtonTextSelected,
-                    ]}
-                  >
-                    {cat}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            {errors.category && (
-              <Text style={styles(colors).errorText}>{errors.category}</Text>
-            )}
-          </View>
+          )}
 
           {/* Date Input */}
           <View style={styles(colors).inputSection}>
@@ -297,7 +324,11 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               activeOpacity={0.8}
               disabled={!amount || !category}
             >
-              <Text style={styles(colors).submitButtonText}>Add Expense</Text>
+              {transactionType === "expense" ? (
+                <Text style={styles(colors).submitButtonText}>Add Expense</Text>
+              ) : (
+                <Text style={styles(colors).submitButtonText}>Add Income</Text>
+              )}
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -356,7 +387,7 @@ const styles = (colors: any) =>
     },
     scrollContent: {
       padding: 20,
-      paddingBottom: 40,
+      paddingBottom: 100,
     },
     inputSection: {
       marginBottom: 24,
@@ -429,19 +460,22 @@ const styles = (colors: any) =>
       minHeight: 80,
       paddingTop: 12,
     },
-    categoryGrid: {
+    actionButtons: {
       flexDirection: "row",
-      flexWrap: "wrap",
-      gap: 8,
+      gap: 12,
+      marginTop: 8,
+      paddingBottom: 20,
     },
-    categoryButton: {
-      backgroundColor: "white",
+    dropdown: {
       borderRadius: 12,
       borderWidth: 2,
       borderColor: GlobalColors.gray[200],
       paddingHorizontal: 16,
       paddingVertical: 12,
-      minWidth: "30%",
+      fontSize: 16,
+      color: GlobalColors.gray[900],
+      height: 50,
+      backgroundColor: "white",
       alignItems: "center",
       ...(Platform.OS === "ios" && {
         shadowColor: GlobalColors.gray[900],
@@ -454,23 +488,65 @@ const styles = (colors: any) =>
       }),
       elevation: Platform.OS === "android" ? 2 : 0,
     },
-    categoryButtonSelected: {
+    dropdownContainer: {
+      borderRadius: 12,
+      borderColor: GlobalColors.gray[200],
+      borderWidth: 1,
+      ...(Platform.OS === "ios" && {
+        shadowColor: GlobalColors.gray[900],
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      }),
+      elevation: Platform.OS === "android" ? 3 : 0,
+    },
+    typeSelectionButtons: {
+      flexDirection: "row",
+      justifyContent: "center",
+      gap: 12,
+      marginBottom: 16,
+      borderColor: GlobalColors.gray[300],
+      borderWidth: 1,
+      borderRadius: 12,
+    },
+    activeTypeButton: {
+      flex: 1,
       backgroundColor: colors.primary[500],
-      borderColor: colors.primary[500],
+      borderRadius: 12,
+      paddingVertical: 16,
+      alignItems: "center",
+      justifyContent: "center",
+      ...(Platform.OS === "ios" && {
+        shadowColor: GlobalColors.gray[900],
+        shadowOffset: {
+          width: 0,
+          height: 4,
+        },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+      }),
+      elevation: Platform.OS === "android" ? 4 : 0,
     },
-    categoryButtonText: {
-      fontSize: 14,
+    activeButtonText: {
+      fontSize: 16,
       fontWeight: "600",
-      color: GlobalColors.gray[700],
-    },
-    categoryButtonTextSelected: {
       color: "white",
     },
-    actionButtons: {
-      flexDirection: "row",
-      gap: 12,
-      marginTop: 8,
-      paddingBottom: 20,
+    inactiveTypeButton: {
+      flex: 1,
+      backgroundColor: GlobalColors.gray[100],
+      borderRadius: 12,
+      paddingVertical: 16,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    inactiveButtonText: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: GlobalColors.gray[700],
     },
     cancelButton: {
       flex: 1,
