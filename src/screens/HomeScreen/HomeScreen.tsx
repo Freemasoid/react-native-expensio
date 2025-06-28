@@ -1,8 +1,7 @@
-import { USER_ID } from "@env";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { User } from "lucide-react-native";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -11,9 +10,8 @@ import { AddTransactionModal } from "@/components/modals";
 import type { IconName } from "@/components/ui/CategoryIcon/icon-map";
 import { useModal } from "@/contexts";
 import { useTheme } from "@/hooks/useTheme";
+import { useTransactions } from "@/hooks/useTransactions";
 import { useAppSelector } from "@/store/hooks";
-import { Transaction, YearlyCategorySummary } from "@/types/types";
-import { getUserExpenses } from "@/utils/api";
 import { styles } from "./styles";
 
 const HomeScreen = () => {
@@ -21,82 +19,71 @@ const HomeScreen = () => {
   const currentTheme = useAppSelector((state) => state.theme.currentTheme);
   const insets = useSafeAreaInsets();
   const { isAddTransactionModalVisible, closeAddTransactionModal } = useModal();
-  const [transactions, setTransactions] = useState<any>(null);
-
-  useEffect(() => {
-    async function getTransactions() {
-      try {
-        const response = await getUserExpenses(USER_ID);
-        setTransactions(response.data);
-      } catch (err) {
-        console.error("Failed to fetch transactions:", err);
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to fetch transactions";
-        console.error(errorMessage);
-      }
-    }
-
-    getTransactions();
-  }, []);
 
   const date = new Date();
   const year = date.getFullYear().toString();
   const month = (date.getMonth() + 1).toString().padStart(2, "0");
 
-  const currentMonthTransactions: Transaction[] = useMemo(() => {
-    return transactions?.transactions?.[year]?.[month] || [];
-  }, [transactions, year, month]);
+  // Use the new hook instead of direct API calls
+  const {
+    transactions,
+    isLoading,
+    error,
+    getMonthlyIncome,
+    getMonthlyExpenses,
+    getTotalBalance,
+    getExpenseCategories,
+    getMonthTransactions,
+  } = useTransactions({ year, month });
 
   const monthlyIncome = useMemo(() => {
-    return currentMonthTransactions
-      .filter((transaction: Transaction) => transaction.type === "income")
-      .reduce(
-        (sum: number, transaction: Transaction) => sum + transaction.amount,
-        0
-      );
-  }, [currentMonthTransactions]);
+    return getMonthlyIncome(year, month);
+  }, [getMonthlyIncome, year, month]);
 
   const monthlyExpenses = useMemo(() => {
-    return currentMonthTransactions
-      .filter((transaction: Transaction) => transaction.type === "expense")
-      .reduce(
-        (sum: number, transaction: Transaction) => sum + transaction.amount,
-        0
-      );
-  }, [currentMonthTransactions]);
+    return getMonthlyExpenses(year, month);
+  }, [getMonthlyExpenses, year, month]);
 
   const totalBalance = useMemo(() => {
-    return monthlyIncome - monthlyExpenses;
-  }, [monthlyExpenses, monthlyIncome]);
+    return getTotalBalance(year, month);
+  }, [getTotalBalance, year, month]);
 
   const expenseCategories = useMemo(() => {
-    const categorySummaries: YearlyCategorySummary =
-      transactions?.categorySummaries?.[year];
+    return getExpenseCategories(year, month);
+  }, [getExpenseCategories, year, month]);
 
-    if (!categorySummaries) return [];
+  const currentMonthTransactions = useMemo(() => {
+    return getMonthTransactions(year, month);
+  }, [getMonthTransactions, year, month]);
 
-    const categoryValues = Object.values(categorySummaries);
-    const expenseCategories = categoryValues.filter(
-      (category) => category.name !== "income"
+  if (isLoading && !transactions) {
+    return (
+      <View
+        style={[
+          styles(colors).container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <Text style={styles(colors).sectionTitle}>Loading transactions...</Text>
+      </View>
     );
+  }
 
-    // Calculate total monthly spend across all expense categories
-    const totalMonthlySpend = expenseCategories.reduce(
-      (sum, category) =>
-        sum + (category.monthlyBreakdown[month]?.monthlySpend || 0),
-      0
+  if (error && !transactions) {
+    return (
+      <View
+        style={[
+          styles(colors).container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <Text style={styles(colors).sectionTitle}>
+          Failed to load transactions
+        </Text>
+        <Text style={styles(colors).subtitle}>{error}</Text>
+      </View>
     );
-
-    return expenseCategories
-      .map((category) => ({
-        name: category.name,
-        monthlySpend: category.monthlyBreakdown[month]?.monthlySpend || 0,
-        totalSpend: totalMonthlySpend,
-        transactionCount:
-          category.monthlyBreakdown[month]?.transactionCount || 0,
-      }))
-      .sort((a, b) => b.monthlySpend - a.monthlySpend);
-  }, [year, month, transactions]);
+  }
 
   return (
     <>
@@ -191,9 +178,9 @@ const HomeScreen = () => {
             <View style={styles(colors).transactionsList}>
               {currentMonthTransactions
                 .slice(0, 4)
-                .map((transaction, index, array) => (
+                .map((transaction: any, index: number, array: any[]) => (
                   <TransactionItem
-                    key={transaction.id}
+                    key={transaction._id}
                     data={transaction}
                     colors={colors}
                     isLast={index === array.length - 1}
