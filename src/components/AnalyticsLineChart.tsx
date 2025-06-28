@@ -1,5 +1,5 @@
 import { GlobalColors } from "@/constants/styles";
-import type { TransactionData } from "@/types/types";
+import type { YearlyCategorySummary } from "@/types/types";
 import { useFont } from "@shopify/react-native-skia";
 import React from "react";
 import { Platform, StyleSheet, Text, View } from "react-native";
@@ -7,7 +7,7 @@ import { CartesianChart, Line } from "victory-native";
 
 interface AnalyticsLineChartProps {
   colors: object;
-  data: TransactionData;
+  data: YearlyCategorySummary;
 }
 
 const AnalyticsLineChart: React.FC<AnalyticsLineChartProps> = ({
@@ -15,10 +15,10 @@ const AnalyticsLineChart: React.FC<AnalyticsLineChartProps> = ({
   data,
 }) => {
   const font = useFont(require("~/assets/fonts/SpaceMono-Regular.ttf"), 13);
+
   const processMonthlyExpensesData = () => {
-    const currentYear = new Date().getFullYear().toString();
     const currentMonth = new Date().getMonth();
-    const categorySummaries = data.categorySummaries[currentYear];
+    const categorySummaries = data;
 
     if (!categorySummaries) {
       return [];
@@ -58,7 +58,7 @@ const AnalyticsLineChart: React.FC<AnalyticsLineChartProps> = ({
         Object.entries(categoryData.monthlyBreakdown).forEach(
           ([month, monthData]) => {
             if (months.includes(month)) {
-              monthlyExpenses[month] += monthData.monthlySpend;
+              monthlyExpenses[month] += monthData.amount;
             }
           }
         );
@@ -123,6 +123,7 @@ const AnalyticsLineChart: React.FC<AnalyticsLineChartProps> = ({
     </View>
   );
 };
+
 export default AnalyticsLineChart;
 
 const styles = (colors: any) =>
