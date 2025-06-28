@@ -1,11 +1,9 @@
 import { AnalyticsLineChart, AnalyticsPieChart } from "@/components";
-import { transactionData } from "@/constants/mock-data";
 import { useTheme } from "@/hooks/useTheme";
+import { useTransactions } from "@/hooks/useTransactions";
 import { useAppSelector } from "@/store/hooks";
-import { getUserExpenses } from "@/utils/api";
-import { USER_ID } from "@env";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./styles";
@@ -14,26 +12,61 @@ const AnalyticsScreen = () => {
   const { colors } = useTheme();
   const currentTheme = useAppSelector((state) => state.theme.currentTheme);
   const insets = useSafeAreaInsets();
-  const [transactions, setTransactions] = useState<any>(null);
 
-  useEffect(() => {
-    async function getTransactions() {
-      try {
-        const response = await getUserExpenses(USER_ID);
-        setTransactions(response);
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to fetch transactions";
+  const date = new Date();
+  const year = date.getFullYear().toString();
 
-        console.error(errorMessage);
-      }
-    }
+  const { transactions, isLoading, error } = useTransactions({
+    year,
+    autoFetch: false,
+  });
 
-    getTransactions();
-  }, []);
+  if (isLoading && !transactions) {
+    return (
+      <View
+        style={[
+          styles(colors).container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <Text style={styles(colors).headerTitle}>Loading analytics...</Text>
+      </View>
+    );
+  }
 
-  // Use real API data if available, otherwise fall back to mock data
-  const analyticsData = transactions?.data || transactionData;
+  if (error && !transactions) {
+    return (
+      <View
+        style={[
+          styles(colors).container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <Text style={styles(colors).headerTitle}>Failed to load analytics</Text>
+        <Text style={styles(colors).headerSubtitle}>{error}</Text>
+      </View>
+    );
+  }
+
+  const categorySummaries = transactions?.categorySummaries?.[year];
+
+  if (!categorySummaries) {
+    return (
+      <View
+        style={[
+          styles(colors).container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <Text style={styles(colors).headerTitle}>
+          No data available for {year}
+        </Text>
+        <Text style={styles(colors).headerSubtitle}>
+          Add some transactions to see analytics
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView
@@ -62,18 +95,19 @@ const AnalyticsScreen = () => {
 
       <View style={styles(colors).content}>
         <AnalyticsLineChart
-          data={analyticsData}
+          data={categorySummaries}
           colors={colors}
         />
       </View>
 
       <View style={styles(colors).content}>
         <AnalyticsPieChart
-          data={analyticsData}
+          data={categorySummaries}
           colors={colors}
         />
       </View>
     </ScrollView>
   );
 };
+
 export default AnalyticsScreen;

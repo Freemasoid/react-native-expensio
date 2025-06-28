@@ -1,25 +1,21 @@
 import { GlobalColors } from "@/constants/styles";
-import type { TransactionData } from "@/types/types";
-import { useFont } from "@shopify/react-native-skia";
+import type { YearlyCategorySummary } from "@/types/types";
 import React from "react";
 import { Platform, StyleSheet, Text, View } from "react-native";
 import { Pie, PolarChart } from "victory-native";
 
 interface AnalyticsPieChartProps {
   colors: object;
-  data: TransactionData;
+  data: YearlyCategorySummary;
 }
 
 const AnalyticsPieChart: React.FC<AnalyticsPieChartProps> = ({
   colors,
   data,
 }) => {
-  const font = useFont(require("~/assets/fonts/SpaceMono-Regular.ttf"), 13);
-
   const processCategoryExpenseData = () => {
-    const currentYear = new Date().getFullYear().toString();
     const currentMonth = new Date().getMonth();
-    const categorySummaries = data.categorySummaries[currentYear];
+    const categorySummaries = data;
 
     if (!categorySummaries) {
       return [];
@@ -46,7 +42,7 @@ const AnalyticsPieChart: React.FC<AnalyticsPieChartProps> = ({
         Object.entries(categoryData.monthlyBreakdown).forEach(
           ([month, monthData]) => {
             if (months.includes(month)) {
-              categoryExpenses[categoryName] += monthData.monthlySpend;
+              categoryExpenses[categoryName] += monthData.amount;
             }
           }
         );
