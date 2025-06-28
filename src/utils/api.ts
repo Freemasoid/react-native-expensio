@@ -1,8 +1,7 @@
-import { API_BASE_URL } from "@env";
 import axios from "axios";
 
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: "http://localhost:5174/api",
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
@@ -30,12 +29,4 @@ apiClient.interceptors.response.use(
   }
 );
 
-export async function getUserExpenses(userId: string) {
-  try {
-    const response = await apiClient.get(`/transactions/${userId}`);
-    return response.data;
-  } catch (error) {
-    console.error("Failed to fetch user expenses:", error);
-    throw error;
-  }
-}
+export default apiClient;

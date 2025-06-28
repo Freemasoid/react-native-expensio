@@ -5,6 +5,7 @@ type Transaction = {
   type: "expense" | "income";
   category: string;
   date: string;
+  newDate?: string;
   description: string;
 };
 
@@ -17,15 +18,13 @@ type YearlyTransactions = {
 };
 
 type CategorySummary = {
-  name: string;
-  monthlySpend: number;
+  amount: number;
   transactionCount: number;
   lastUpdated: string;
 };
 
 type YearlyCategorySummary = {
   [category: string]: {
-    name: string;
     yearlySpend: number;
     monthlyBreakdown: {
       [month: string]: CategorySummary;
