@@ -1,6 +1,6 @@
 import { GlobalColors } from "@/constants/styles";
 import { useTheme } from "@/hooks/useTheme";
-import { useAppDispatch } from "@/store/hooks";
+import { useTransactions } from "@/hooks/useTransactions";
 import { Transaction } from "@/types/types";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import {
@@ -36,7 +36,6 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   onClose,
 }) => {
   const { colors } = useTheme();
-  const dispatch = useAppDispatch();
 
   // Form state
   const [title, setTitle] = useState("");
@@ -47,6 +46,8 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   const [category, setCategory] = useState("");
   const [date, setDate] = useState(new Date());
   const [description, setDescription] = useState("");
+
+  const { addTransactionOptimistically } = useTransactions();
 
   const [errors, setErrors] = useState<{
     amount?: string;
@@ -93,7 +94,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Validation
     const newErrors: { amount?: string; category?: string } = {};
 
@@ -124,7 +125,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       description: description,
     };
 
-    console.log(transaction);
+    await addTransactionOptimistically(transaction);
 
     resetForm();
     onClose();
