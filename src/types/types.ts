@@ -1,5 +1,5 @@
 type Transaction = {
-  id: string;
+  _id?: string;
   title: string;
   amount: number;
   type: "expense" | "income";
@@ -7,6 +7,20 @@ type Transaction = {
   date: string;
   newDate?: string;
   description: string;
+  createdAt?: string;
+  updatedAt?: string;
+  _v?: number;
+};
+
+type NewTransaction = Pick<
+  Transaction,
+  "title" | "amount" | "type" | "category" | "date" | "description"
+>;
+
+type PendingTransaction = NewTransaction & {
+  tempId: string;
+  isPending: true;
+  createdAt: string;
 };
 
 type MonthlyTransactions = {
@@ -44,6 +58,8 @@ type TransactionData = {
 export {
   CategorySummary,
   MonthlyTransactions,
+  NewTransaction,
+  PendingTransaction,
   Transaction,
   TransactionData,
   YearlyCategorySummary,
