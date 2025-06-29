@@ -1,9 +1,12 @@
 import { GlobalColors } from "@/constants/styles";
 import { useTheme } from "@/hooks/useTheme";
 import { useAppDispatch } from "@/store/hooks";
+import { Transaction } from "@/types/types";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import {
   Calendar,
-  DollarSign,
+  Captions,
+  EuroIcon,
   FileText,
   Receipt,
   Tag,
@@ -36,31 +39,42 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   const dispatch = useAppDispatch();
 
   // Form state
+  const [title, setTitle] = useState("");
+  const [transactionType, setTransactionType] = useState<"expense" | "income">(
+    "expense"
+  );
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState(new Date());
   const [description, setDescription] = useState("");
+
   const [errors, setErrors] = useState<{
     amount?: string;
     category?: string;
   }>({});
-  const [transactionType, setTransactionType] = useState("expense");
 
   const categories = [
-    "Food",
-    "Transport",
-    "Shopping",
-    "Entertainment",
-    "Bills",
-    "Health",
-    "Travel",
-    "Other",
+    "food",
+    "transport",
+    "shopping",
+    "entertainment",
+    "bills",
+    "healthcare",
+    "education",
+    "travel",
+    "housing",
+    "utilities",
+    "insurance",
+    "investment",
+    "salary",
+    "freelance",
+    "gifts",
   ];
 
   const resetForm = () => {
     setAmount("");
     setCategory("");
-    setDate(new Date().toISOString().split("T")[0]);
+    setDate(new Date());
     setDescription("");
     setErrors({});
   };
@@ -70,6 +84,12 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     setAmount(formatted);
     if (errors.amount) {
       setErrors((prev) => ({ ...prev, amount: undefined }));
+    }
+  };
+
+  const onDatepickerChange = (event: any, selectedDate?: Date) => {
+    if (selectedDate) {
+      setDate(selectedDate);
     }
   };
 
@@ -85,20 +105,23 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       newErrors.category = "Please select a category";
     }
 
+    if (!category && transactionType === "income") {
+      setCategory("income");
+    }
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
 
     // Create transaction
-    const transaction = {
-      id: Date.now().toString(),
-      title: description || `${category} expense`,
+    const transaction: Transaction = {
+      title: title,
       amount: parseFloat(amount),
-      type: "expense" as const,
-      category: category.toLowerCase(),
-      date: new Date(date).toISOString(),
-      description: description || `${category} expense`,
+      type: transactionType,
+      category: transactionType === "income" ? "income" : category,
+      date: date.toISOString(),
+      description: description,
     };
 
     console.log(transaction);
@@ -167,7 +190,32 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Action Buttons - Now inside ScrollView */}
+          {/* Title Input */}
+          <View style={styles(colors).inputSection}>
+            <View style={styles(colors).labelContainer}>
+              <Captions
+                size={20}
+                color={colors.primary[500]}
+              />
+              <Text style={styles(colors).label}>Title *</Text>
+            </View>
+            <View style={styles(colors).amountInputContainer}>
+              <TextInput
+                style={styles(colors).amountInput}
+                value={title}
+                onChangeText={setTitle}
+                placeholder="Name your transaction..."
+                placeholderTextColor={GlobalColors.gray[400]}
+                keyboardType="default"
+                returnKeyType="none"
+              />
+            </View>
+            {errors.amount && (
+              <Text style={styles(colors).errorText}>{errors.amount}</Text>
+            )}
+          </View>
+
+          {/* Action Buttons */}
           <View style={styles(colors).typeSelectionButtons}>
             <TouchableOpacity
               style={
@@ -213,14 +261,13 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
           {/* Amount Input */}
           <View style={styles(colors).inputSection}>
             <View style={styles(colors).labelContainer}>
-              <DollarSign
+              <EuroIcon
                 size={20}
                 color={colors.primary[500]}
               />
               <Text style={styles(colors).label}>Amount *</Text>
             </View>
             <View style={styles(colors).amountInputContainer}>
-              <Text style={styles(colors).currencySymbol}>€</Text>
               <TextInput
                 style={styles(colors).amountInput}
                 value={amount}
@@ -256,6 +303,9 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                 maxHeight={300}
                 labelField="label"
                 valueField="value"
+                selectedTextStyle={styles(colors).dropdownSelectedText}
+                itemTextStyle={{ textTransform: "capitalize" }}
+                inputSearchStyle={{ borderRadius: 6 }}
                 value={category}
                 onChange={(item) => {
                   setCategory(item.value);
@@ -271,16 +321,17 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                 size={20}
                 color={colors.primary[500]}
               />
-              <Text style={styles(colors).label}>Date</Text>
+              <Text style={styles(colors).label}>Date *</Text>
             </View>
-            <TextInput
-              style={styles(colors).textInput}
-              value={date}
-              onChangeText={setDate}
-              placeholder="YYYY-MM-DD"
-              placeholderTextColor={GlobalColors.gray[400]}
-              returnKeyType="next"
-            />
+            <View style={styles(colors).datePickerField}>
+              <DateTimePicker
+                testID="dateTimePicker"
+                value={date}
+                mode={"date"}
+                is24Hour={true}
+                onChange={onDatepickerChange}
+              />
+            </View>
           </View>
 
           {/* Description Input */}
@@ -294,7 +345,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             </View>
             <TextInput
               style={[styles(colors).textInput, styles(colors).textArea]}
-              placeholder="Add a note about this expense..."
+              placeholder="Add a note about this transaction..."
               placeholderTextColor={GlobalColors.gray[400]}
               value={description}
               onChangeText={setDescription}
@@ -305,7 +356,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             />
           </View>
 
-          {/* Action Buttons - Now inside ScrollView */}
+          {/* Action Buttons */}
           <View style={styles(colors).actionButtons}>
             <TouchableOpacity
               style={styles(colors).cancelButton}
@@ -315,21 +366,33 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               <Text style={styles(colors).cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[
-                styles(colors).submitButton,
-                (!amount || !category) && styles(colors).submitButtonDisabled,
-              ]}
-              onPress={handleSubmit}
-              activeOpacity={0.8}
-              disabled={!amount || !category}
-            >
-              {transactionType === "expense" ? (
+            {transactionType === "expense" ? (
+              <TouchableOpacity
+                style={[
+                  styles(colors).submitButton,
+                  (!amount || !category || !date || !title) &&
+                    styles(colors).submitButtonDisabled,
+                ]}
+                onPress={handleSubmit}
+                activeOpacity={0.8}
+                disabled={!amount || !category || !date || !title}
+              >
                 <Text style={styles(colors).submitButtonText}>Add Expense</Text>
-              ) : (
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={[
+                  styles(colors).submitButton,
+                  (!amount || !date || !title) &&
+                    styles(colors).submitButtonDisabled,
+                ]}
+                onPress={handleSubmit}
+                activeOpacity={0.8}
+                disabled={!amount || !date || !title}
+              >
                 <Text style={styles(colors).submitButtonText}>Add Income</Text>
-              )}
-            </TouchableOpacity>
+              </TouchableOpacity>
+            )}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -423,16 +486,10 @@ const styles = (colors: any) =>
       }),
       elevation: Platform.OS === "android" ? 2 : 0,
     },
-    currencySymbol: {
-      fontSize: 20,
-      fontWeight: "600",
-      color: colors.primary[500],
-      marginRight: 8,
-    },
     amountInput: {
       flex: 1,
-      fontSize: 20,
-      fontWeight: "600",
+      fontSize: 18,
+      fontWeight: "400",
       color: GlobalColors.gray[900],
       padding: 0,
     },
@@ -443,7 +500,25 @@ const styles = (colors: any) =>
       borderColor: GlobalColors.gray[200],
       paddingHorizontal: 16,
       paddingVertical: 12,
-      fontSize: 16,
+      fontSize: 18,
+      color: GlobalColors.gray[900],
+      ...(Platform.OS === "ios" && {
+        shadowColor: GlobalColors.gray[900],
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+      }),
+      elevation: Platform.OS === "android" ? 2 : 0,
+    },
+    datePickerField: {
+      backgroundColor: "white",
+      borderRadius: 12,
+      borderWidth: 2,
+      borderColor: GlobalColors.gray[200],
+      paddingVertical: 8,
       color: GlobalColors.gray[900],
       ...(Platform.OS === "ios" && {
         shadowColor: GlobalColors.gray[900],
@@ -503,6 +578,14 @@ const styles = (colors: any) =>
       }),
       elevation: Platform.OS === "android" ? 3 : 0,
     },
+    dropdownSelectedText: {
+      flex: 1,
+      fontSize: 18,
+      fontWeight: "400",
+      color: GlobalColors.gray[900],
+      padding: 0,
+      textTransform: "capitalize",
+    },
     typeSelectionButtons: {
       flexDirection: "row",
       justifyContent: "center",
@@ -551,6 +634,8 @@ const styles = (colors: any) =>
     cancelButton: {
       flex: 1,
       backgroundColor: GlobalColors.gray[100],
+      borderWidth: 1,
+      borderColor: GlobalColors.gray[500],
       borderRadius: 12,
       paddingVertical: 16,
       alignItems: "center",
