@@ -33,7 +33,7 @@ const HomeScreen = () => {
     getMonthlyExpenses,
     getTotalBalance,
     getExpenseCategories,
-    getMonthTransactions,
+    getCombinedMonthTransactions,
   } = useTransactions({ year, month });
 
   const monthlyIncome = useMemo(() => {
@@ -53,8 +53,8 @@ const HomeScreen = () => {
   }, [getExpenseCategories, year, month]);
 
   const currentMonthTransactions = useMemo(() => {
-    return getMonthTransactions(year, month);
-  }, [getMonthTransactions, year, month]);
+    return getCombinedMonthTransactions(year, month);
+  }, [getCombinedMonthTransactions, year, month]);
 
   if (isLoading && !transactions) {
     return (
