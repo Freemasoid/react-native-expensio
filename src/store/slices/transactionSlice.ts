@@ -1,12 +1,20 @@
-import type { Transaction, TransactionData } from "@/types/types";
-import { getUserTransactions } from "@/utils/calls";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-
-const TRANSACTIONS_STORAGE_KEY = "userTransactions";
+import type {
+  NewTransaction,
+  PendingTransaction,
+  Transaction,
+  TransactionData,
+} from "@/types/types";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import {
+  addTransactionOptimistic,
+  clearTransactionsStorage,
+  fetchAndStoreTransactions,
+  loadTransactionsFromStorage,
+} from "../thunks/transactionThunk";
 
 interface TransactionState {
   transactions: TransactionData | null;
+  pendingTransactions: PendingTransaction[];
   isLoading: boolean;
   error: string | null;
   lastFetched: number | null;
@@ -14,69 +22,37 @@ interface TransactionState {
 
 const initialState: TransactionState = {
   transactions: null,
+  pendingTransactions: [],
   isLoading: false,
   error: null,
   lastFetched: null,
 };
 
-export const loadTransactionsFromStorage = createAsyncThunk(
-  "transactions/loadFromStorage",
-  async () => {
-    try {
-      const storedData = await AsyncStorage.getItem(TRANSACTIONS_STORAGE_KEY);
-      if (storedData) {
-        const parsedData = JSON.parse(storedData);
-        return parsedData;
-      }
-      return null;
-    } catch (error) {
-      console.error("Failed to load transactions from storage:", error);
-      return null;
-    }
-  }
-);
-
-export const fetchAndStoreTransactions = createAsyncThunk(
-  "transactions/fetchAndStore",
-  async ({
-    clerkId,
-    options,
-  }: {
-    clerkId: string;
-    options?: { year?: string; month?: string };
-  }) => {
-    try {
-      const response = await getUserTransactions(clerkId, options);
-      const transactionsData = response.data;
-
-      await AsyncStorage.setItem(
-        TRANSACTIONS_STORAGE_KEY,
-        JSON.stringify(transactionsData)
-      );
-
-      return transactionsData;
-    } catch (error) {
-      console.error("Failed to fetch and store transactions:", error);
-      throw error;
-    }
-  }
-);
-
-export const clearTransactionsStorage = createAsyncThunk(
-  "transactions/clearStorage",
-  async () => {
-    try {
-      await AsyncStorage.removeItem(TRANSACTIONS_STORAGE_KEY);
-    } catch (error) {
-      console.error("Failed to clear transactions storage:", error);
-    }
-  }
-);
-
 const transactionSlice = createSlice({
   name: "transactions",
   initialState,
   reducers: {
+    addTransactionPending: (state, action: PayloadAction<NewTransaction>) => {
+      const newTransaction = action.payload;
+      const pendingTransaction: PendingTransaction = {
+        ...newTransaction,
+        tempId: `temp_${Date.now()}_${Math.random()
+          .toString(36)
+          .substring(2, 11)}`,
+        isPending: true,
+        createdAt: new Date().toISOString(),
+      };
+
+      state.pendingTransactions.push(pendingTransaction);
+    },
+
+    removePendingTransaction: (state, action: PayloadAction<string>) => {
+      const tempId = action.payload;
+      state.pendingTransactions = state.pendingTransactions.filter(
+        (transaction) => transaction.tempId !== tempId
+      );
+    },
+
     addTransaction: (state, action: PayloadAction<Transaction>) => {
       if (!state.transactions) return;
 
@@ -104,7 +80,7 @@ const transactionSlice = createSlice({
         Object.keys(state.transactions!.transactions[year]).forEach((month) => {
           state.transactions!.transactions[year][month] =
             state.transactions!.transactions[year][month].filter(
-              (transaction) => transaction.id !== transactionId
+              (transaction) => transaction._id !== transactionId
             );
         });
       });
@@ -122,7 +98,7 @@ const transactionSlice = createSlice({
         Object.keys(state.transactions!.transactions[year]).forEach((month) => {
           const transaction = state.transactions!.transactions[year][
             month
-          ].find((transaction) => transaction.id === id);
+          ].find((transaction) => transaction._id === id);
 
           if (transaction) {
             Object.assign(transaction, data);
@@ -137,6 +113,10 @@ const transactionSlice = createSlice({
 
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
+    },
+
+    clearPendingTransactions: (state) => {
+      state.pendingTransactions = [];
     },
   },
   extraReducers: (builder) => {
@@ -171,16 +151,50 @@ const transactionSlice = createSlice({
       .addCase(clearTransactionsStorage.fulfilled, (state) => {
         state.transactions = null;
         state.lastFetched = null;
+      })
+      .addCase(addTransactionOptimistic.fulfilled, (state, action) => {
+        const { tempId, serverTransaction } = action.payload;
+
+        state.pendingTransactions = state.pendingTransactions.filter(
+          (transaction) => transaction.tempId !== tempId
+        );
+
+        if (state.transactions && serverTransaction) {
+          const date = new Date(serverTransaction.date);
+          const year = date.getFullYear().toString();
+          const month = (date.getMonth() + 1).toString().padStart(2, "0");
+
+          if (!state.transactions.transactions[year]) {
+            state.transactions.transactions[year] = {};
+          }
+          if (!state.transactions.transactions[year][month]) {
+            state.transactions.transactions[year][month] = [];
+          }
+
+          state.transactions.transactions[year][month].push(serverTransaction);
+        }
+      })
+      .addCase(addTransactionOptimistic.rejected, (state, action) => {
+        const tempId = action.meta.arg.tempId;
+
+        state.pendingTransactions = state.pendingTransactions.filter(
+          (transaction) => transaction.tempId !== tempId
+        );
+
+        state.error = action.error.message || "Failed to add transaction";
       });
   },
 });
 
 export const {
+  addTransactionPending,
+  removePendingTransaction,
   addTransaction,
   deleteTransaction,
   updateTransaction,
   clearError,
   setLoading,
+  clearPendingTransactions,
 } = transactionSlice.actions;
 
 export default transactionSlice.reducer;
