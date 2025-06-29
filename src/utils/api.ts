@@ -1,7 +1,8 @@
+import { API_BASE_URL, ENV } from "@env";
 import axios from "axios";
 
 const apiClient = axios.create({
-  baseURL: "http://localhost:5174/api",
+  baseURL: ENV === "prod" ? API_BASE_URL : "http://localhost:5174/api",
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
