@@ -1,7 +1,7 @@
 import { GlobalColors } from "@/constants/styles";
 import { useTheme } from "@/hooks/useTheme";
 import { useTransactions } from "@/hooks/useTransactions";
-import { Transaction } from "@/types/types";
+import { NewTransaction } from "@/types/types";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import {
   Calendar,
@@ -102,12 +102,8 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       newErrors.amount = "Please enter a valid amount";
     }
 
-    if (!category) {
+    if (transactionType === "expense" && !category) {
       newErrors.category = "Please select a category";
-    }
-
-    if (!category && transactionType === "income") {
-      setCategory("income");
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -115,20 +111,23 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       return;
     }
 
-    // Create transaction
-    const transaction: Transaction = {
-      title: title,
-      amount: parseFloat(amount),
-      type: transactionType,
-      category: transactionType === "income" ? "income" : category,
-      date: date.toISOString(),
-      description: description,
-    };
+    try {
+      const newTransaction: NewTransaction = {
+        title: title,
+        amount: parseFloat(amount),
+        type: transactionType,
+        category: transactionType === "income" ? "income" : category,
+        date: date.toISOString(),
+        description: description,
+      };
 
-    await addTransactionOptimistically(transaction);
+      await addTransactionOptimistically(newTransaction);
 
-    resetForm();
-    onClose();
+      resetForm();
+      onClose();
+    } catch (error) {
+      console.error("Failed to add transaction:", error);
+    }
   };
 
   const formatAmount = (text: string) => {
@@ -371,12 +370,12 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               <TouchableOpacity
                 style={[
                   styles(colors).submitButton,
-                  (!amount || !category || !date || !title) &&
+                  (!amount || !category || !title) &&
                     styles(colors).submitButtonDisabled,
                 ]}
                 onPress={handleSubmit}
                 activeOpacity={0.8}
-                disabled={!amount || !category || !date || !title}
+                disabled={!amount || !category || !title}
               >
                 <Text style={styles(colors).submitButtonText}>Add Expense</Text>
               </TouchableOpacity>
@@ -384,12 +383,11 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               <TouchableOpacity
                 style={[
                   styles(colors).submitButton,
-                  (!amount || !date || !title) &&
-                    styles(colors).submitButtonDisabled,
+                  (!amount || !title) && styles(colors).submitButtonDisabled,
                 ]}
                 onPress={handleSubmit}
                 activeOpacity={0.8}
-                disabled={!amount || !date || !title}
+                disabled={!amount || !title}
               >
                 <Text style={styles(colors).submitButtonText}>Add Income</Text>
               </TouchableOpacity>
