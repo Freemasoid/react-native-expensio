@@ -1,7 +1,7 @@
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { User } from "lucide-react-native";
-import React, { useMemo } from "react";
+import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -24,7 +24,6 @@ const HomeScreen = () => {
   const year = date.getFullYear().toString();
   const month = (date.getMonth() + 1).toString().padStart(2, "0");
 
-  // Use the new hook instead of direct API calls
   const {
     transactions,
     isLoading,
@@ -36,25 +35,11 @@ const HomeScreen = () => {
     getCombinedMonthTransactions,
   } = useTransactions({ year, month });
 
-  const monthlyIncome = useMemo(() => {
-    return getMonthlyIncome(year, month);
-  }, [getMonthlyIncome, year, month]);
-
-  const monthlyExpenses = useMemo(() => {
-    return getMonthlyExpenses(year, month);
-  }, [getMonthlyExpenses, year, month]);
-
-  const totalBalance = useMemo(() => {
-    return getTotalBalance(year, month);
-  }, [getTotalBalance, year, month]);
-
-  const expenseCategories = useMemo(() => {
-    return getExpenseCategories(year, month);
-  }, [getExpenseCategories, year, month]);
-
-  const currentMonthTransactions = useMemo(() => {
-    return getCombinedMonthTransactions(year, month);
-  }, [getCombinedMonthTransactions, year, month]);
+  const monthlyIncome = getMonthlyIncome(year, month);
+  const monthlyExpenses = getMonthlyExpenses(year, month);
+  const totalBalance = getTotalBalance(year, month);
+  const expenseCategories = getExpenseCategories(year, month);
+  const currentMonthTransactions = getCombinedMonthTransactions(year, month);
 
   if (isLoading && !transactions) {
     return (

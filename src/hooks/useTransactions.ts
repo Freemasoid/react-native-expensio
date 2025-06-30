@@ -99,24 +99,58 @@ export const useTransactions = (options: UseTransactionsOptions = {}) => {
   };
 
   const getMonthlyIncome = (targetYear: string, targetMonth: string) => {
-    return (
+    const storedIncome =
       transactions?.categorySummaries?.[targetYear]?.income?.monthlyBreakdown?.[
         targetMonth
-      ]?.amount || 0
-    );
+      ]?.amount || 0;
+
+    const pendingIncome = pendingTransactions
+      .filter((pending) => {
+        const pendingDate = new Date(pending.date);
+        const pendingYear = pendingDate.getFullYear().toString();
+        const pendingMonth = (pendingDate.getMonth() + 1)
+          .toString()
+          .padStart(2, "0");
+        return (
+          pendingYear === targetYear &&
+          pendingMonth === targetMonth &&
+          pending.type === "income"
+        );
+      })
+      .reduce((sum, pending) => sum + pending.amount, 0);
+
+    return storedIncome + pendingIncome;
   };
 
   const getMonthlyExpenses = (targetYear: string, targetMonth: string) => {
     const categorySummaries = transactions?.categorySummaries?.[targetYear];
-    if (!categorySummaries) return 0;
 
-    return Object.entries(categorySummaries)
-      .filter(([categoryName]) => categoryName !== "income")
-      .reduce((sum, [_, categoryData]: [string, any]) => {
-        const monthlyAmount =
-          categoryData.monthlyBreakdown?.[targetMonth]?.amount || 0;
-        return sum + monthlyAmount;
-      }, 0);
+    const storedExpenses = categorySummaries
+      ? Object.entries(categorySummaries)
+          .filter(([categoryName]) => categoryName !== "income")
+          .reduce((sum, [_, categoryData]: [string, any]) => {
+            const monthlyAmount =
+              categoryData.monthlyBreakdown?.[targetMonth]?.amount || 0;
+            return sum + monthlyAmount;
+          }, 0)
+      : 0;
+
+    const pendingExpenses = pendingTransactions
+      .filter((pending) => {
+        const pendingDate = new Date(pending.date);
+        const pendingYear = pendingDate.getFullYear().toString();
+        const pendingMonth = (pendingDate.getMonth() + 1)
+          .toString()
+          .padStart(2, "0");
+        return (
+          pendingYear === targetYear &&
+          pendingMonth === targetMonth &&
+          pending.type === "expense"
+        );
+      })
+      .reduce((sum, pending) => sum + pending.amount, 0);
+
+    return storedExpenses + pendingExpenses;
   };
 
   const getExpenseCategories = (targetYear: string, targetMonth: string) => {
