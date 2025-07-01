@@ -210,10 +210,10 @@ export const useTransactions = (options: UseTransactionsOptions = {}) => {
     };
   }, [transactions, pendingTransactions]);
 
-  const getTotalBalance = (targetYear: string, targetMonth: string) => {
-    const income = getMonthlyIncome(targetYear, targetMonth);
-    const expenses = getMonthlyExpenses(targetYear, targetMonth);
-    return income - expenses;
+  const getTotalBalance = () => {
+    const result =
+      (transactions?.totalIncome || 0) - (transactions?.totalSpend || 0);
+    return result;
   };
 
   const isDataStale = () => {
