@@ -1,3 +1,4 @@
+import { AddTransactionModal } from "@/components/modals";
 import React, { createContext, ReactNode, useContext, useState } from "react";
 
 interface ModalContextType {
@@ -28,7 +29,13 @@ export const ModalProvider: React.FC<ModalProviderProps> = ({ children }) => {
   };
 
   return (
-    <ModalContext.Provider value={value}>{children}</ModalContext.Provider>
+    <ModalContext.Provider value={value}>
+      {children}
+      <AddTransactionModal
+        isVisible={isAddTransactionModalVisible}
+        onClose={closeAddTransactionModal}
+      />
+    </ModalContext.Provider>
   );
 };
 
