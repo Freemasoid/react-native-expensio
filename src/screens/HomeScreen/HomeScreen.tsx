@@ -37,7 +37,7 @@ const HomeScreen = () => {
 
   const monthlyIncome = getMonthlyIncome(year, month);
   const monthlyExpenses = getMonthlyExpenses(year, month);
-  const totalBalance = getTotalBalance(year, month);
+  const totalBalance = getTotalBalance();
   const expenseCategories = getExpenseCategories(year, month);
   const currentMonthTransactions = getCombinedMonthTransactions(year, month);
 
@@ -107,7 +107,7 @@ const HomeScreen = () => {
               <Text style={styles(colors).balanceLabel}>Total Balance</Text>
               <Text style={styles(colors).balanceAmount}>
                 {totalBalance.toFixed(2)} €
-              </Text>
+              </Text>{" "}
               <View style={styles(colors).balanceDetails}>
                 <View>
                   <Text style={styles(colors).balanceDetailLabel}>Income</Text>
