@@ -1,21 +1,28 @@
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { User } from "lucide-react-native";
-import React from "react";
+import React, { useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CategoryCard, SpendingChart, TransactionItem } from "@/components";
+import { AddTransactionModal } from "@/components/modals/AddTransactionModal";
 import type { IconName } from "@/components/ui/CategoryIcon/icon-map";
 import { useTheme } from "@/hooks/useTheme";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useAppSelector } from "@/store/hooks";
+import { Transaction } from "@/types/types";
 import { styles } from "./styles";
 
 const HomeScreen = () => {
   const { colors } = useTheme();
   const currentTheme = useAppSelector((state) => state.theme.currentTheme);
   const insets = useSafeAreaInsets();
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<
+    Transaction | undefined
+  >(undefined);
 
   const date = new Date();
   const year = date.getFullYear().toString();
@@ -37,6 +44,16 @@ const HomeScreen = () => {
   const totalBalance = getTotalBalance();
   const expenseCategories = getExpenseCategories(year, month);
   const currentMonthTransactions = getCombinedMonthTransactions(year, month);
+
+  const handleOpenTransaction = (data: Transaction) => {
+    setSelectedTransaction(data);
+    setIsModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalVisible(false);
+    setSelectedTransaction(undefined);
+  };
 
   if (isLoading && !transactions) {
     return (
@@ -156,16 +173,27 @@ const HomeScreen = () => {
             {currentMonthTransactions
               .slice(0, 4)
               .map((transaction: any, index: number, array: any[]) => (
-                <TransactionItem
+                <TouchableOpacity
                   key={transaction._id}
-                  data={transaction}
-                  colors={colors}
-                  isLast={index === array.length - 1}
-                />
+                  onPress={() => handleOpenTransaction(transaction)}
+                >
+                  <TransactionItem
+                    key={transaction._id}
+                    data={transaction}
+                    colors={colors}
+                    isLast={index === array.length - 1}
+                  />
+                </TouchableOpacity>
               ))}
           </View>
         </View>
       </View>
+
+      <AddTransactionModal
+        isVisible={isModalVisible}
+        onClose={handleCloseModal}
+        transaction={selectedTransaction}
+      />
     </ScrollView>
   );
 };
