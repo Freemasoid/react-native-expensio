@@ -4,10 +4,10 @@
 
 A modern, intuitive expense tracking mobile application built with React Native, TypeScript, and Redux. Track your spending, manage your budget, and gain insights into your financial habits with beautiful visualizations and seamless user experience.
 
-|                                                |                                                        |                                                    |
-| ---------------------------------------------- | ------------------------------------------------------ | -------------------------------------------------- |
-| ![Theme](./assets/app-showcase/myappTheme.png) | ![Analytics](./assets/app-showcase/myappAnalytics.png) | ![Profile](./assets/app-showcase/myappProfile.png) |
-| ![Demo](./assets/app-showcase/myapp1.gif)      |                                                        |                                                    |
+|                                                              |                                                        |                                                    |
+| ------------------------------------------------------------ | ------------------------------------------------------ | -------------------------------------------------- |
+| ![Theme](./assets/app-showcase/myappTheme.png)               | ![Analytics](./assets/app-showcase/myappAnalytics.png) | ![Profile](./assets/app-showcase/myappProfile.png) |
+| ![CreateUpdate](./assets/app-showcase/myappCreateUpdate.png) | ![Demo](./assets/app-showcase/myapp1.gif)              |                                                    |
 
 ## 🚀 Features
 
