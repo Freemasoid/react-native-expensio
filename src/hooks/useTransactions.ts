@@ -92,6 +92,8 @@ export const useTransactions = (options: UseTransactionsOptions = {}) => {
           tempId: pendingTransaction.tempId,
         })
       ).unwrap();
+
+      await refreshTransactions();
     } catch (error) {
       console.error("Failed to add transaction optimistically:", error);
       throw error;
