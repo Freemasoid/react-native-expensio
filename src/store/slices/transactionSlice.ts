@@ -10,6 +10,7 @@ import {
   clearTransactionsStorage,
   fetchAndStoreTransactions,
   loadTransactionsFromStorage,
+  updateTransactionOptimistic,
 } from "../thunks/transactionThunk";
 
 interface TransactionState {
@@ -86,25 +87,38 @@ const transactionSlice = createSlice({
       });
     },
 
-    updateTransaction: (
-      state,
-      action: PayloadAction<{ id: string; data: Partial<Transaction> }>
-    ) => {
+    updateTransaction: (state, action: PayloadAction<Transaction>) => {
       if (!state.transactions) return;
 
-      const { id, data } = action.payload;
+      const updatedTransaction = action.payload;
+      const transactionId = updatedTransaction._id;
 
       Object.keys(state.transactions.transactions).forEach((year) => {
         Object.keys(state.transactions!.transactions[year]).forEach((month) => {
-          const transaction = state.transactions!.transactions[year][
-            month
-          ].find((transaction) => transaction._id === id);
-
-          if (transaction) {
-            Object.assign(transaction, data);
-          }
+          state.transactions!.transactions[year][month] =
+            state.transactions!.transactions[year][month].filter(
+              (t) => t._id !== transactionId
+            );
         });
       });
+
+      // Add the updated transaction to its new location
+      const newDateObj = new Date(updatedTransaction.date);
+      const newYear = newDateObj.getFullYear().toString();
+      const newMonth = (newDateObj.getMonth() + 1).toString().padStart(2, "0");
+
+      // Ensure the new location exists
+      if (!state.transactions.transactions[newYear]) {
+        state.transactions.transactions[newYear] = {};
+      }
+      if (!state.transactions.transactions[newYear][newMonth]) {
+        state.transactions.transactions[newYear][newMonth] = [];
+      }
+
+      // Add the updated transaction
+      state.transactions.transactions[newYear][newMonth].push(
+        updatedTransaction
+      );
     },
 
     clearError: (state) => {
@@ -182,6 +196,29 @@ const transactionSlice = createSlice({
         );
 
         state.error = action.error.message || "Failed to add transaction";
+      })
+      .addCase(updateTransactionOptimistic.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateTransactionOptimistic.fulfilled, (state, action) => {
+        state.isLoading = false;
+
+        // Backend returns the updated transactions data, so replace the entire state
+        if (action.payload && action.payload.transactions) {
+          state.transactions = action.payload.transactions;
+        } else if (action.payload && action.payload.transaction) {
+          // If backend only returns the updated transaction, update it manually
+          const updatedTransaction = action.payload.transaction;
+          transactionSlice.caseReducers.updateTransaction(state, {
+            type: "updateTransaction",
+            payload: updatedTransaction,
+          });
+        }
+      })
+      .addCase(updateTransactionOptimistic.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to update transaction";
       });
   },
 });

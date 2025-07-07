@@ -1,5 +1,9 @@
-import { NewTransaction, PendingTransaction } from "@/types/types";
-import { createTransaction, getUserTransactions } from "@/utils/calls";
+import { NewTransaction, PendingTransaction, Transaction } from "@/types/types";
+import {
+  createTransaction,
+  getUserTransactions,
+  updateTransaction,
+} from "@/utils/calls";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
@@ -136,3 +140,27 @@ export const loadPendingTransactions = async (): Promise<
     return [];
   }
 };
+
+export const updateTransactionOptimistic = createAsyncThunk(
+  "transactions/updateTransactionOptimistic",
+  async ({
+    clerkId,
+    transactionData,
+  }: {
+    clerkId: string;
+    transactionData: Transaction;
+  }) => {
+    try {
+      const response = await updateTransaction(clerkId, transactionData);
+
+      if (!response || !response.data) {
+        throw new Error("Invalid response from server");
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error("Failed to update transaction:", error);
+      throw error;
+    }
+  }
+);
