@@ -6,6 +6,7 @@ import {
   fetchAndStoreTransactions,
   loadTransactionsFromStorage,
   savePendingTransaction,
+  updateTransactionOptimistic,
 } from "@/store/thunks/transactionThunk";
 import { NewTransaction, Transaction } from "@/types/types";
 import { USER_ID } from "@env";
@@ -96,6 +97,24 @@ export const useTransactions = (options: UseTransactionsOptions = {}) => {
       await refreshTransactions();
     } catch (error) {
       console.error("Failed to add transaction optimistically:", error);
+      throw error;
+    }
+  };
+
+  const updateTransactionOptimistically = async (
+    updatedTransaction: Transaction
+  ) => {
+    try {
+      await dispatch(
+        updateTransactionOptimistic({
+          clerkId: USER_ID,
+          transactionData: updatedTransaction,
+        })
+      ).unwrap();
+
+      await refreshTransactions();
+    } catch (error) {
+      console.error("Failed to update transaction optimistically:", error);
       throw error;
     }
   };
@@ -237,6 +256,7 @@ export const useTransactions = (options: UseTransactionsOptions = {}) => {
     refreshTransactions,
     clearData,
     addTransactionOptimistically,
+    updateTransactionOptimistically,
 
     // Helper functions
     getMonthlyIncome,
