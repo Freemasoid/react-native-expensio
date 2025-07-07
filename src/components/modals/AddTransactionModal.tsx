@@ -1,7 +1,7 @@
 import { GlobalColors } from "@/constants/styles";
 import { useTheme } from "@/hooks/useTheme";
 import { useTransactions } from "@/hooks/useTransactions";
-import { NewTransaction } from "@/types/types";
+import { NewTransaction, Transaction } from "@/types/types";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import {
   Calendar,
@@ -12,7 +12,7 @@ import {
   Tag,
   X,
 } from "lucide-react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
   Modal,
@@ -29,11 +29,13 @@ import { Dropdown } from "react-native-element-dropdown";
 interface AddTransactionModalProps {
   isVisible: boolean;
   onClose: () => void;
+  transaction?: Transaction; // Optional transaction for editing
 }
 
 export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   isVisible,
   onClose,
+  transaction,
 }) => {
   const { colors } = useTheme();
 
@@ -47,7 +49,8 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   const [date, setDate] = useState(new Date());
   const [description, setDescription] = useState("");
 
-  const { addTransactionOptimistically } = useTransactions();
+  const { addTransactionOptimistically, updateTransactionOptimistically } =
+    useTransactions();
 
   const [errors, setErrors] = useState<{
     amount?: string;
@@ -72,7 +75,24 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     "gifts",
   ];
 
+  const isEditing = !!transaction;
+
+  useEffect(() => {
+    if (transaction) {
+      setTitle(transaction.title);
+      setTransactionType(transaction.type);
+      setAmount(transaction.amount.toString());
+      setCategory(
+        transaction.category === "income" ? "" : transaction.category
+      );
+      setDate(new Date(transaction.date));
+      setDescription(transaction.description || "");
+    }
+  }, [transaction]);
+
   const resetForm = () => {
+    setTitle("");
+    setTransactionType("expense");
     setAmount("");
     setCategory("");
     setDate(new Date());
@@ -119,21 +139,37 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     }
 
     try {
-      const newTransaction: NewTransaction = {
-        title: title,
-        amount: parseFloat(amount),
-        type: transactionType,
-        category: transactionType === "income" ? "income" : category,
-        date: date.toISOString(),
-        description: description,
-      };
+      if (isEditing && transaction) {
+        // Update existing transaction
+        const updatedTransaction: Transaction = {
+          ...transaction,
+          title: title,
+          amount: parseFloat(amount),
+          type: transactionType,
+          category: transactionType === "income" ? "income" : category,
+          date: date.toISOString(),
+          description: description,
+        };
 
-      await addTransactionOptimistically(newTransaction);
+        await updateTransactionOptimistically(updatedTransaction);
+      } else {
+        // Create new transaction
+        const newTransaction: NewTransaction = {
+          title: title,
+          amount: parseFloat(amount),
+          type: transactionType,
+          category: transactionType === "income" ? "income" : category,
+          date: date.toISOString(),
+          description: description,
+        };
+
+        await addTransactionOptimistically(newTransaction);
+      }
 
       resetForm();
       onClose();
     } catch (error) {
-      console.error("Failed to add transaction:", error);
+      console.error("Failed to save transaction:", error);
     }
   };
 
@@ -176,7 +212,9 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                   color="white"
                 />
               </View>
-              <Text style={styles(colors).headerTitle}>Add Transaction</Text>
+              <Text style={styles(colors).headerTitle}>
+                {isEditing ? "Update Transaction" : "Add Transaction"}
+              </Text>
             </View>
             <TouchableOpacity
               style={styles(colors).closeButton}
@@ -389,7 +427,9 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                 activeOpacity={0.8}
                 disabled={!amount || !category || !title}
               >
-                <Text style={styles(colors).submitButtonText}>Add Expense</Text>
+                <Text style={styles(colors).submitButtonText}>
+                  {isEditing ? "Update Expense" : "Add Expense"}
+                </Text>
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
@@ -401,7 +441,9 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                 activeOpacity={0.8}
                 disabled={!amount || !title}
               >
-                <Text style={styles(colors).submitButtonText}>Add Income</Text>
+                <Text style={styles(colors).submitButtonText}>
+                  {isEditing ? "Update Income" : "Add Income"}
+                </Text>
               </TouchableOpacity>
             )}
           </View>
