@@ -94,6 +94,13 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     }
   };
 
+  const formatDateDisplay = (date: Date) => {
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}.${month}.${year}`;
+  };
+
   const handleSubmit = async () => {
     // Validation
     const newErrors: { amount?: string; category?: string } = {};
@@ -304,8 +311,9 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                 labelField="label"
                 valueField="value"
                 selectedTextStyle={styles(colors).dropdownSelectedText}
-                itemTextStyle={{ textTransform: "capitalize" }}
-                inputSearchStyle={{ borderRadius: 6 }}
+                itemTextStyle={{ textTransform: "capitalize", fontSize: 18 }}
+                inputSearchStyle={{ borderRadius: 6, fontSize: 18 }}
+                placeholderStyle={{ fontSize: 18 }}
                 value={category}
                 onChange={(item) => {
                   setCategory(item.value);
@@ -324,12 +332,16 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               <Text style={styles(colors).label}>Date *</Text>
             </View>
             <View style={styles(colors).datePickerField}>
+              <Text style={styles(colors).datePickerText}>
+                {formatDateDisplay(date)}
+              </Text>
               <DateTimePicker
                 testID="dateTimePicker"
                 value={date}
                 mode={"date"}
                 is24Hour={true}
                 onChange={onDatepickerChange}
+                style={styles(colors).invisibleDatePicker}
               />
             </View>
           </View>
@@ -466,6 +478,7 @@ const styles = (colors: any) =>
       color: GlobalColors.gray[700],
     },
     amountInputContainer: {
+      fontSize: 18,
       flexDirection: "row",
       alignItems: "center",
       backgroundColor: "white",
@@ -517,8 +530,10 @@ const styles = (colors: any) =>
       borderRadius: 12,
       borderWidth: 2,
       borderColor: GlobalColors.gray[200],
-      paddingVertical: 8,
-      color: GlobalColors.gray[900],
+      paddingHorizontal: 16,
+      paddingVertical: 16,
+      justifyContent: "center",
+      position: "relative",
       ...(Platform.OS === "ios" && {
         shadowColor: GlobalColors.gray[900],
         shadowOffset: {
@@ -529,6 +544,18 @@ const styles = (colors: any) =>
         shadowRadius: 4,
       }),
       elevation: Platform.OS === "android" ? 2 : 0,
+    },
+    datePickerText: {
+      fontSize: 18,
+      fontWeight: "400",
+      color: GlobalColors.gray[900],
+    },
+    invisibleDatePicker: {
+      position: "absolute",
+      left: 1,
+      opacity: 0.1,
+      zIndex: 1,
+      color: "white",
     },
     textArea: {
       minHeight: 80,
@@ -546,7 +573,7 @@ const styles = (colors: any) =>
       borderColor: GlobalColors.gray[200],
       paddingHorizontal: 16,
       paddingVertical: 12,
-      fontSize: 16,
+      fontSize: 18,
       color: GlobalColors.gray[900],
       height: 50,
       backgroundColor: "white",
@@ -576,6 +603,7 @@ const styles = (colors: any) =>
         shadowRadius: 4,
       }),
       elevation: Platform.OS === "android" ? 3 : 0,
+      fontSize: 18,
     },
     dropdownSelectedText: {
       flex: 1,
