@@ -8,6 +8,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   addTransactionOptimistic,
   clearTransactionsStorage,
+  deleteTransactionOptimistic,
   fetchAndStoreTransactions,
   loadTransactionsFromStorage,
   updateTransactionOptimistic,
@@ -102,12 +103,10 @@ const transactionSlice = createSlice({
         });
       });
 
-      // Add the updated transaction to its new location
       const newDateObj = new Date(updatedTransaction.date);
       const newYear = newDateObj.getFullYear().toString();
       const newMonth = (newDateObj.getMonth() + 1).toString().padStart(2, "0");
 
-      // Ensure the new location exists
       if (!state.transactions.transactions[newYear]) {
         state.transactions.transactions[newYear] = {};
       }
@@ -115,7 +114,6 @@ const transactionSlice = createSlice({
         state.transactions.transactions[newYear][newMonth] = [];
       }
 
-      // Add the updated transaction
       state.transactions.transactions[newYear][newMonth].push(
         updatedTransaction
       );
@@ -204,11 +202,9 @@ const transactionSlice = createSlice({
       .addCase(updateTransactionOptimistic.fulfilled, (state, action) => {
         state.isLoading = false;
 
-        // Backend returns the updated transactions data, so replace the entire state
         if (action.payload && action.payload.transactions) {
           state.transactions = action.payload.transactions;
         } else if (action.payload && action.payload.transaction) {
-          // If backend only returns the updated transaction, update it manually
           const updatedTransaction = action.payload.transaction;
           transactionSlice.caseReducers.updateTransaction(state, {
             type: "updateTransaction",
@@ -219,6 +215,27 @@ const transactionSlice = createSlice({
       .addCase(updateTransactionOptimistic.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || "Failed to update transaction";
+      })
+      .addCase(deleteTransactionOptimistic.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(deleteTransactionOptimistic.fulfilled, (state, action) => {
+        state.isLoading = false;
+
+        if (action.payload && action.payload.transactions) {
+          state.transactions = action.payload.transactions;
+        } else if (action.payload && action.payload.transaction) {
+          const deletedTransaction = action.payload.transaction;
+          transactionSlice.caseReducers.deleteTransaction(state, {
+            type: "deleteTransaction",
+            payload: deletedTransaction._id,
+          });
+        }
+      })
+      .addCase(deleteTransactionOptimistic.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to delete transaction";
       });
   },
 });

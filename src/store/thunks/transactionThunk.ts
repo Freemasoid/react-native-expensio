@@ -1,6 +1,7 @@
 import { NewTransaction, PendingTransaction, Transaction } from "@/types/types";
 import {
   createTransaction,
+  deleteTransaction,
   getUserTransactions,
   updateTransaction,
 } from "@/utils/calls";
@@ -160,6 +161,30 @@ export const updateTransactionOptimistic = createAsyncThunk(
       return response.data;
     } catch (error) {
       console.error("Failed to update transaction:", error);
+      throw error;
+    }
+  }
+);
+
+export const deleteTransactionOptimistic = createAsyncThunk(
+  "transactions/deleteTransactionOptimistic",
+  async ({
+    clerkId,
+    transactionData,
+  }: {
+    clerkId: string;
+    transactionData: Transaction;
+  }) => {
+    try {
+      const response = await deleteTransaction(clerkId, transactionData);
+
+      if (!response || !response.data) {
+        throw new Error("Invalid response from server");
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error("Failed to delete transaction:", error);
       throw error;
     }
   }
