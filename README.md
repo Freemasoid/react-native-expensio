@@ -51,6 +51,8 @@ Before you begin, ensure you have the following installed:
 
 ## 🚀 Getting Started
 
+You can get an API for this app from my another repo **[here](https://github.com/Freemasoid/node-expensio-api)**.
+
 ### Installation
 
 1. **Clone the repository**
