@@ -12,6 +12,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useAppSelector } from "@/store/hooks";
 import { Transaction } from "@/types/types";
+import TransactionsScreen from "../TransactionsScreen/TransactionsScreen";
 import { styles } from "./styles";
 
 const HomeScreen = () => {
@@ -23,6 +24,7 @@ const HomeScreen = () => {
   const [selectedTransaction, setSelectedTransaction] = useState<
     Transaction | undefined
   >(undefined);
+  const [showTransactions, setShowTransactions] = useState(false);
 
   const date = new Date();
   const year = date.getFullYear().toString();
@@ -54,6 +56,10 @@ const HomeScreen = () => {
     setIsModalVisible(false);
     setSelectedTransaction(undefined);
   };
+
+  if (showTransactions) {
+    return <TransactionsScreen onBack={() => setShowTransactions(false)} />;
+  }
 
   if (isLoading && !transactions) {
     return (
@@ -164,7 +170,7 @@ const HomeScreen = () => {
         <View style={styles(colors).section}>
           <View style={styles(colors).transactionsHeader}>
             <Text style={styles(colors).sectionTitle}>Recent Transactions</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => setShowTransactions(true)}>
               <Text style={styles(colors).seeAllButton}>See All</Text>
             </TouchableOpacity>
           </View>

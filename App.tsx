@@ -13,7 +13,6 @@ import { useTheme } from "@/hooks/useTheme";
 import { persistor, store } from "@/store/store";
 import { View } from "react-native";
 
-// Import your screens
 import AnalyticsScreen from "@/screens/AnalyticsScreen";
 import CardsScreen from "@/screens/CardsScreen";
 import HomeScreen from "@/screens/HomeScreen";
