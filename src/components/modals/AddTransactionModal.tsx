@@ -29,7 +29,7 @@ import { Dropdown } from "react-native-element-dropdown";
 interface AddTransactionModalProps {
   isVisible: boolean;
   onClose: () => void;
-  transaction?: Transaction; // Optional transaction for editing
+  transaction?: Transaction;
 }
 
 export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
@@ -39,7 +39,6 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 }) => {
   const { colors } = useTheme();
 
-  // Form state
   const [title, setTitle] = useState("");
   const [transactionType, setTransactionType] = useState<"expense" | "income">(
     "expense"
@@ -49,8 +48,11 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   const [date, setDate] = useState(new Date());
   const [description, setDescription] = useState("");
 
-  const { addTransactionOptimistically, updateTransactionOptimistically } =
-    useTransactions();
+  const {
+    addTransactionOptimistically,
+    updateTransactionOptimistically,
+    deleteTransactionOptimistically,
+  } = useTransactions();
 
   const [errors, setErrors] = useState<{
     amount?: string;
@@ -122,7 +124,6 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   };
 
   const handleSubmit = async () => {
-    // Validation
     const newErrors: { amount?: string; category?: string } = {};
 
     if (!amount || parseFloat(amount) <= 0) {
@@ -140,7 +141,6 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
     try {
       if (isEditing && transaction) {
-        // Update existing transaction
         const updatedTransaction: Transaction = {
           ...transaction,
           title: title,
@@ -153,7 +153,6 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
         await updateTransactionOptimistically(updatedTransaction);
       } else {
-        // Create new transaction
         const newTransaction: NewTransaction = {
           title: title,
           amount: parseFloat(amount),
@@ -170,6 +169,18 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       onClose();
     } catch (error) {
       console.error("Failed to save transaction:", error);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!transaction) return;
+
+    try {
+      await deleteTransactionOptimistically(transaction);
+      resetForm();
+      onClose();
+    } catch (error) {
+      console.error("Failed to delete transaction:", error);
     }
   };
 
@@ -447,6 +458,21 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               </TouchableOpacity>
             )}
           </View>
+
+          {/* Delete Button for Editing */}
+          {isEditing && (
+            <View style={styles(colors).actionButtons}>
+              <TouchableOpacity
+                style={styles(colors).deleteButton}
+                activeOpacity={0.8}
+                onPress={handleDelete}
+              >
+                <Text style={styles(colors).deleteButtonText}>
+                  Delete Transaction
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
     </Modal>
@@ -714,6 +740,29 @@ const styles = (colors: any) =>
       fontSize: 16,
       fontWeight: "600",
       color: GlobalColors.gray[700],
+    },
+    deleteButton: {
+      flex: 1,
+      backgroundColor: GlobalColors.red,
+      borderRadius: 12,
+      paddingVertical: 16,
+      alignItems: "center",
+      justifyContent: "center",
+      ...(Platform.OS === "ios" && {
+        shadowColor: GlobalColors.gray[900],
+        shadowOffset: {
+          width: 0,
+          height: 4,
+        },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+      }),
+      elevation: Platform.OS === "android" ? 4 : 0,
+    },
+    deleteButtonText: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: "white",
     },
     submitButton: {
       flex: 1,
