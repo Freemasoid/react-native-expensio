@@ -3,6 +3,7 @@ import { addTransactionPending } from "@/store/slices/transactionSlice";
 import {
   addTransactionOptimistic,
   clearTransactionsStorage,
+  deleteTransactionOptimistic,
   fetchAndStoreTransactions,
   loadTransactionsFromStorage,
   savePendingTransaction,
@@ -115,6 +116,24 @@ export const useTransactions = (options: UseTransactionsOptions = {}) => {
       await refreshTransactions();
     } catch (error) {
       console.error("Failed to update transaction optimistically:", error);
+      throw error;
+    }
+  };
+
+  const deleteTransactionOptimistically = async (
+    deletedTransaction: Transaction
+  ) => {
+    try {
+      await dispatch(
+        deleteTransactionOptimistic({
+          clerkId: USER_ID,
+          transactionData: deletedTransaction,
+        })
+      ).unwrap();
+
+      await refreshTransactions();
+    } catch (error) {
+      console.error("Failed to delete transaction optimistically:", error);
       throw error;
     }
   };
@@ -257,6 +276,7 @@ export const useTransactions = (options: UseTransactionsOptions = {}) => {
     clearData,
     addTransactionOptimistically,
     updateTransactionOptimistically,
+    deleteTransactionOptimistically,
 
     // Helper functions
     getMonthlyIncome,
