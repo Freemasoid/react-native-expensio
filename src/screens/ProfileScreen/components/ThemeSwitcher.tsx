@@ -175,7 +175,7 @@ const styles = (colors: any) =>
       textAlign: "center",
     },
     selectedThemeLabel: {
-      color: colors.primary[600],
+      color: "white",
     },
     selectedIndicator: {
       position: "absolute",

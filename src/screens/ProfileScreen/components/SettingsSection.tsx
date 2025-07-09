@@ -1,9 +1,7 @@
 import { GlobalColors } from "@/constants/styles";
 import { useTheme } from "@/hooks/useTheme";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { updatePreferences } from "@/store/slices/userSlice";
+import { useAppSelector } from "@/store/hooks";
 import {
-  Bell,
   ChevronRight,
   Globe,
   HelpCircle,
@@ -11,14 +9,12 @@ import {
   Shield,
   Smartphone,
   Trash2,
-  User,
 } from "lucide-react-native";
 import React from "react";
 import {
   Alert,
   Platform,
   StyleSheet,
-  Switch,
   Text,
   TouchableOpacity,
   View,
@@ -97,12 +93,7 @@ const SettingItem: React.FC<SettingItemProps> = ({
 
 export const SettingsSection: React.FC = () => {
   const { colors } = useTheme();
-  const dispatch = useAppDispatch();
   const { profile } = useAppSelector((state) => state.user);
-
-  const handleNotificationToggle = (value: boolean) => {
-    dispatch(updatePreferences({ notifications: value }));
-  };
 
   const handleSignOut = () => {
     Alert.alert("Sign Out", "Are you sure you want to sign out?", [
@@ -135,38 +126,6 @@ export const SettingsSection: React.FC = () => {
   };
 
   const settingSections = [
-    {
-      title: "Account",
-      items: [
-        {
-          icon: User,
-          title: "Personal Information",
-          subtitle: "Update your profile details",
-          onPress: () => console.log("Edit profile"),
-        },
-        {
-          icon: Bell,
-          title: "Notifications",
-          subtitle: profile.preferences.notifications ? "Enabled" : "Disabled",
-          rightElement: (
-            <Switch
-              value={profile.preferences.notifications}
-              onValueChange={handleNotificationToggle}
-              trackColor={{
-                false: GlobalColors.gray[300],
-                true: colors.primary_accent[500],
-              }}
-              thumbColor={
-                profile.preferences.notifications
-                  ? colors.primary[400]
-                  : GlobalColors.gray[500]
-              }
-            />
-          ),
-          showChevron: false,
-        },
-      ],
-    },
     {
       title: "Preferences",
       items: [
