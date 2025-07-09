@@ -4,12 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
-  SettingsSection,
-  StatsCard,
-  ThemeSwitcher,
-  UserCard,
-} from "./components";
+import { SettingsSection, ThemeSwitcher, UserCard } from "./components";
 import { styles } from "./styles";
 
 const ProfileScreen = () => {
@@ -57,9 +52,6 @@ const ProfileScreen = () => {
           onEditAvatar={handleEditAvatar}
           onEditProfile={handleEditProfile}
         />
-
-        {/* Financial Statistics */}
-        <StatsCard />
 
         {/* Theme Switcher */}
         <ThemeSwitcher />
