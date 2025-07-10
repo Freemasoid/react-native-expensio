@@ -55,9 +55,38 @@ type TransactionData = {
   };
 };
 
+type Card = {
+  _id?: string;
+  bankName: string;
+  cardType: "credit" | "debit";
+  lastFourDigits: string;
+  expiryMonth: string;
+  expiryYear: string;
+  cardholderName: string;
+  color: string;
+  isDefault?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  _v?: number;
+};
+
+type NewCard = Pick<
+  Card,
+  | "bankName"
+  | "cardType"
+  | "lastFourDigits"
+  | "expiryMonth"
+  | "expiryYear"
+  | "cardholderName"
+  | "color"
+  | "isDefault"
+>;
+
 export {
+  Card,
   CategorySummary,
   MonthlyTransactions,
+  NewCard,
   NewTransaction,
   PendingTransaction,
   Transaction,
