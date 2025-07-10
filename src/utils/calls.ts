@@ -1,4 +1,4 @@
-import { Transaction } from "@/types/types";
+import { Card, NewCard, Transaction } from "@/types/types";
 import apiClient from "./api";
 
 // Transactions
@@ -110,5 +110,47 @@ export async function deleteUserCategory(clerkId: string, category: string) {
     return response;
   } catch (error) {
     console.error("Failed to delete user category", error);
+  }
+}
+
+// Cards
+
+export async function getUserCards(clerkId: string) {
+  try {
+    const response = await apiClient.get(`/cards/${clerkId}`);
+    return response;
+  } catch (error) {
+    console.error("Failed to get user cards", error);
+    throw error;
+  }
+}
+
+export async function createCard(clerkId: string, data: NewCard) {
+  try {
+    const response = await apiClient.post(`/cards/${clerkId}`, data);
+    return response;
+  } catch (error) {
+    console.error("Failed to create a card:", error);
+    throw error;
+  }
+}
+
+export async function updateCard(clerkId: string, data: Card) {
+  try {
+    const response = await apiClient.post(`/cards/update/${clerkId}`, data);
+    return response;
+  } catch (error) {
+    console.error("Failed to update a card", error);
+    throw error;
+  }
+}
+
+export async function deleteCard(clerkId: string, data: Partial<Card>) {
+  try {
+    const response = await apiClient.delete(`/cards/${clerkId}`, { data });
+    return response;
+  } catch (error) {
+    console.error("Failed to delete a card", error);
+    throw error;
   }
 }
