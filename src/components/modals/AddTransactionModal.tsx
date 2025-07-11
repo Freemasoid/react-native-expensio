@@ -39,14 +39,18 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 }) => {
   const { colors } = useTheme();
 
-  const [title, setTitle] = useState("");
-  const [transactionType, setTransactionType] = useState<"expense" | "income">(
-    "expense"
-  );
-  const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState("");
-  const [date, setDate] = useState(new Date());
-  const [description, setDescription] = useState("");
+  const [formData, setFormData] = useState<NewTransaction>({
+    title: "",
+    amount: 0,
+    type: "expense",
+    category: "",
+    date: new Date().toISOString(),
+    description: "",
+  });
+
+  const updateField = (field: keyof NewTransaction, value: any) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   const {
     addTransactionOptimistically,
@@ -81,30 +85,32 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
   useEffect(() => {
     if (transaction) {
-      setTitle(transaction.title);
-      setTransactionType(transaction.type);
-      setAmount(transaction.amount.toString());
-      setCategory(
-        transaction.category === "income" ? "" : transaction.category
-      );
-      setDate(new Date(transaction.date));
-      setDescription(transaction.description || "");
+      setFormData({
+        title: transaction.title,
+        amount: transaction.amount,
+        type: transaction.type,
+        category: transaction.category === "income" ? "" : transaction.category,
+        date: transaction.date,
+        description: transaction.description || "",
+      });
     }
   }, [transaction]);
 
   const resetForm = () => {
-    setTitle("");
-    setTransactionType("expense");
-    setAmount("");
-    setCategory("");
-    setDate(new Date());
-    setDescription("");
+    setFormData({
+      title: "",
+      amount: 0,
+      type: "expense",
+      category: "",
+      date: new Date().toISOString(),
+      description: "",
+    });
     setErrors({});
   };
 
   const handleAmountChange = (text: string) => {
     const formatted = formatAmount(text);
-    setAmount(formatted);
+    updateField("amount", parseFloat(formatted) || 0);
     if (errors.amount) {
       setErrors((prev) => ({ ...prev, amount: undefined }));
     }
@@ -112,11 +118,12 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
   const onDatepickerChange = (event: any, selectedDate?: Date) => {
     if (selectedDate) {
-      setDate(selectedDate);
+      updateField("date", selectedDate.toISOString());
     }
   };
 
-  const formatDateDisplay = (date: Date) => {
+  const formatDateDisplay = (dateString: string) => {
+    const date = new Date(dateString);
     const day = date.getDate().toString().padStart(2, "0");
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
     const year = date.getFullYear();
@@ -126,11 +133,11 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   const handleSubmit = async () => {
     const newErrors: { amount?: string; category?: string } = {};
 
-    if (!amount || parseFloat(amount) <= 0) {
+    if (!formData.amount || formData.amount <= 0) {
       newErrors.amount = "Please enter a valid amount";
     }
 
-    if (transactionType === "expense" && !category) {
+    if (formData.type === "expense" && !formData.category) {
       newErrors.category = "Please select a category";
     }
 
@@ -143,23 +150,15 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       if (isEditing && transaction) {
         const updatedTransaction: Transaction = {
           ...transaction,
-          title: title,
-          amount: parseFloat(amount),
-          type: transactionType,
-          category: transactionType === "income" ? "income" : category,
-          date: date.toISOString(),
-          description: description,
+          ...formData,
+          category: formData.type === "income" ? "income" : formData.category,
         };
 
         await updateTransactionOptimistically(updatedTransaction);
       } else {
         const newTransaction: NewTransaction = {
-          title: title,
-          amount: parseFloat(amount),
-          type: transactionType,
-          category: transactionType === "income" ? "income" : category,
-          date: date.toISOString(),
-          description: description,
+          ...formData,
+          category: formData.type === "income" ? "income" : formData.category,
         };
 
         await addTransactionOptimistically(newTransaction);
@@ -258,8 +257,8 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             <View style={styles(colors).amountInputContainer}>
               <TextInput
                 style={styles(colors).amountInput}
-                value={title}
-                onChangeText={setTitle}
+                value={formData.title}
+                onChangeText={(text) => updateField("title", text)}
                 placeholder="Name your transaction..."
                 placeholderTextColor={GlobalColors.gray[400]}
                 keyboardType="default"
@@ -275,16 +274,16 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
           <View style={styles(colors).typeSelectionButtons}>
             <TouchableOpacity
               style={
-                transactionType === "expense"
+                formData.type === "expense"
                   ? styles(colors).activeTypeButton
                   : styles(colors).inactiveTypeButton
               }
-              onPress={() => setTransactionType("expense")}
+              onPress={() => updateField("type", "expense")}
               activeOpacity={0.7}
             >
               <Text
                 style={
-                  transactionType === "expense"
+                  formData.type === "expense"
                     ? styles(colors).activeButtonText
                     : styles(colors).inactiveButtonText
                 }
@@ -295,16 +294,16 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
             <TouchableOpacity
               style={
-                transactionType === "income"
+                formData.type === "income"
                   ? styles(colors).activeTypeButton
                   : styles(colors).inactiveTypeButton
               }
-              onPress={() => setTransactionType("income")}
+              onPress={() => updateField("type", "income")}
               activeOpacity={0.8}
             >
               <Text
                 style={
-                  transactionType === "income"
+                  formData.type === "income"
                     ? styles(colors).activeButtonText
                     : styles(colors).inactiveButtonText
                 }
@@ -326,7 +325,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             <View style={styles(colors).amountInputContainer}>
               <TextInput
                 style={styles(colors).amountInput}
-                value={amount}
+                value={formData.amount.toString()}
                 onChangeText={handleAmountChange}
                 placeholder="0.00"
                 placeholderTextColor={GlobalColors.gray[400]}
@@ -340,7 +339,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
           </View>
 
           {/* Category Selection */}
-          {transactionType === "expense" && (
+          {formData.type === "expense" && (
             <View style={styles(colors).inputSection}>
               <View style={styles(colors).labelContainer}>
                 <Tag
@@ -363,9 +362,9 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                 itemTextStyle={{ textTransform: "capitalize", fontSize: 18 }}
                 inputSearchStyle={{ borderRadius: 6, fontSize: 18 }}
                 placeholderStyle={{ fontSize: 18 }}
-                value={category}
+                value={formData.category}
                 onChange={(item) => {
-                  setCategory(item.value);
+                  updateField("category", item.value);
                 }}
               />
             </View>
@@ -382,11 +381,11 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             </View>
             <View style={styles(colors).datePickerField}>
               <Text style={styles(colors).datePickerText}>
-                {formatDateDisplay(date)}
+                {formatDateDisplay(formData.date)}
               </Text>
               <DateTimePicker
                 testID="dateTimePicker"
-                value={date}
+                value={new Date(formData.date)}
                 mode={"date"}
                 is24Hour={true}
                 onChange={onDatepickerChange}
@@ -408,8 +407,8 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               style={[styles(colors).textInput, styles(colors).textArea]}
               placeholder="Add a note about this transaction..."
               placeholderTextColor={GlobalColors.gray[400]}
-              value={description}
-              onChangeText={setDescription}
+              value={formData.description}
+              onChangeText={(text) => updateField("description", text)}
               multiline
               numberOfLines={3}
               textAlignVertical="top"
@@ -427,16 +426,18 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               <Text style={styles(colors).cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
 
-            {transactionType === "expense" ? (
+            {formData.type === "expense" ? (
               <TouchableOpacity
                 style={[
                   styles(colors).submitButton,
-                  (!amount || !category || !title) &&
+                  (!formData.amount || !formData.category || !formData.title) &&
                     styles(colors).submitButtonDisabled,
                 ]}
                 onPress={handleSubmit}
                 activeOpacity={0.8}
-                disabled={!amount || !category || !title}
+                disabled={
+                  !formData.amount || !formData.category || !formData.title
+                }
               >
                 <Text style={styles(colors).submitButtonText}>
                   {isEditing ? "Update Expense" : "Add Expense"}
@@ -446,11 +447,12 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               <TouchableOpacity
                 style={[
                   styles(colors).submitButton,
-                  (!amount || !title) && styles(colors).submitButtonDisabled,
+                  (!formData.amount || !formData.title) &&
+                    styles(colors).submitButtonDisabled,
                 ]}
                 onPress={handleSubmit}
                 activeOpacity={0.8}
-                disabled={!amount || !title}
+                disabled={!formData.amount || !formData.title}
               >
                 <Text style={styles(colors).submitButtonText}>
                   {isEditing ? "Update Income" : "Add Income"}
