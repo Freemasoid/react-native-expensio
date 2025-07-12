@@ -11,10 +11,10 @@ import {
 } from "react-native";
 
 interface EmptyStateProps {
-  onAddCard: () => void;
+  onPress: () => void;
 }
 
-export const EmptyState: React.FC<EmptyStateProps> = ({ onAddCard }) => {
+export const EmptyState: React.FC<EmptyStateProps> = ({ onPress }) => {
   const { colors } = useTheme();
 
   return (
@@ -35,7 +35,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ onAddCard }) => {
 
       <TouchableOpacity
         style={styles(colors).addButton}
-        onPress={onAddCard}
+        onPress={onPress}
         activeOpacity={0.8}
       >
         <Plus
