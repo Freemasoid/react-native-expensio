@@ -1,4 +1,5 @@
 import { GlobalColors } from "@/constants/styles";
+import { useContrastColor } from "@/hooks/useContrastColor";
 import { useTheme } from "@/hooks/useTheme";
 import { useAppDispatch } from "@/store/hooks";
 import type { Card } from "@/store/slices/cardsSlice";
@@ -22,6 +23,10 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onEdit }) => {
   const { colors } = useTheme();
   const dispatch = useAppDispatch();
 
+  const cardBackgroundColor = card.color || colors.primary[500];
+  const { textColor, secondaryTextColor } =
+    useContrastColor(cardBackgroundColor);
+
   const formatCardNumber = (lastFour: string) => {
     return `•••• •••• •••• ${lastFour}`;
   };
@@ -35,7 +40,7 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onEdit }) => {
   const handleRemoveCard = () => {
     Alert.alert(
       "Remove Card",
-      `Are you sure you want to remove this ${card.cardType} card?`,
+      `Are you sure you want to remove this ${card.cardType || "card"}?`,
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -55,24 +60,34 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onEdit }) => {
 
   return (
     <View style={styles(colors).container}>
-      <View style={[styles(colors).card, { backgroundColor: card.color }]}>
+      <View
+        style={[styles(colors).card, { backgroundColor: cardBackgroundColor }]}
+      >
         {/* Card Header */}
         <View style={styles(colors).cardHeader}>
           <View style={styles(colors).bankInfo}>
-            <Text style={styles(colors).bankName}>{card.bankName}</Text>
-            <Text style={styles(colors).cardType}>
-              {card.cardType.charAt(0).toUpperCase() + card.cardType.slice(1)}{" "}
-              Card
+            <Text style={[styles(colors).bankName, { color: textColor }]}>
+              {card.bankName}
+            </Text>
+            <Text
+              style={[styles(colors).cardType, { color: secondaryTextColor }]}
+            >
+              {card.cardType.toUpperCase()} Card
             </Text>
           </View>
 
           <View style={styles(colors).cardActions}>
             {card.isDefault && (
-              <View style={styles(colors).defaultBadge}>
+              <View
+                style={[
+                  styles(colors).defaultBadge,
+                  { backgroundColor: textColor },
+                ]}
+              >
                 <Star
                   size={12}
-                  color={colors.primary[500]}
-                  fill={colors.primary[500]}
+                  color={cardBackgroundColor}
+                  fill={cardBackgroundColor}
                 />
               </View>
             )}
@@ -82,7 +97,7 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onEdit }) => {
                 <View style={styles(colors).actionButton}>
                   <MoreVertical
                     size={20}
-                    color="white"
+                    color={textColor}
                   />
                 </View>
               </MenuTrigger>
@@ -132,7 +147,7 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onEdit }) => {
 
         {/* Card Number */}
         <View style={styles(colors).cardNumber}>
-          <Text style={styles(colors).cardNumberText}>
+          <Text style={[styles(colors).cardNumberText, { color: textColor }]}>
             {formatCardNumber(card.lastFourDigits)}
           </Text>
         </View>
@@ -140,8 +155,14 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onEdit }) => {
         {/* Card Footer */}
         <View style={styles(colors).cardFooter}>
           <View>
-            <Text style={styles(colors).cardLabel}>Cardholder</Text>
-            <Text style={styles(colors).cardValue}>{card.cardholderName}</Text>
+            <Text
+              style={[styles(colors).cardLabel, { color: secondaryTextColor }]}
+            >
+              Cardholder
+            </Text>
+            <Text style={[styles(colors).cardValue, { color: textColor }]}>
+              {card.cardholderName}
+            </Text>
           </View>
         </View>
       </View>
@@ -208,12 +229,10 @@ const styles = (colors: any) =>
     bankName: {
       fontSize: 20,
       fontWeight: "bold",
-      color: "white",
       marginBottom: 4,
     },
     cardType: {
       fontSize: 14,
-      color: "rgba(255, 255, 255, 0.8)",
       textTransform: "capitalize",
     },
     cardActions: {
@@ -222,7 +241,6 @@ const styles = (colors: any) =>
       gap: 8,
     },
     defaultBadge: {
-      backgroundColor: "white",
       borderRadius: 12,
       width: 24,
       height: 24,
@@ -239,7 +257,6 @@ const styles = (colors: any) =>
     cardNumberText: {
       fontSize: 18,
       fontWeight: "600",
-      color: "white",
       letterSpacing: 2,
     },
     cardFooter: {
@@ -249,13 +266,11 @@ const styles = (colors: any) =>
     },
     cardLabel: {
       fontSize: 12,
-      color: "rgba(255, 255, 255, 0.7)",
       marginBottom: 4,
     },
     cardValue: {
       fontSize: 14,
       fontWeight: "600",
-      color: "white",
     },
     menuItem: {
       flexDirection: "row",
