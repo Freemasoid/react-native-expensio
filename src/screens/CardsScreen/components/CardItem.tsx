@@ -5,8 +5,15 @@ import { useAppDispatch } from "@/store/hooks";
 import type { Card } from "@/store/slices/cardsSlice";
 import { removeCard, setDefaultCard } from "@/store/slices/cardsSlice";
 import { MoreVertical, Star } from "lucide-react-native";
-import React from "react";
-import { Alert, Platform, StyleSheet, Text, View } from "react-native";
+import React, { useRef } from "react";
+import {
+  Alert,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import {
   Menu,
   MenuOption,
@@ -22,6 +29,7 @@ interface CardItemProps {
 export const CardItem: React.FC<CardItemProps> = ({ card, onEdit }) => {
   const { colors } = useTheme();
   const dispatch = useAppDispatch();
+  const menuRef = useRef<any>(null);
 
   const cardBackgroundColor = card.color || colors.primary[500];
   const { textColor, secondaryTextColor } =
@@ -92,15 +100,18 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onEdit }) => {
               </View>
             )}
 
-            <Menu>
-              <MenuTrigger>
-                <View style={styles(colors).actionButton}>
-                  <MoreVertical
-                    size={20}
-                    color={textColor}
-                  />
-                </View>
-              </MenuTrigger>
+            <Menu ref={menuRef}>
+              <TouchableOpacity
+                style={[styles(colors).actionButton, { borderRadius: 8 }]}
+                onPress={() => menuRef.current?.open()}
+                activeOpacity={0.7}
+              >
+                <MoreVertical
+                  size={20}
+                  color={textColor}
+                />
+              </TouchableOpacity>
+              <MenuTrigger style={{ display: "none" }} />
 
               <MenuOptions customStyles={menuOptionsStyles}>
                 {!card.isDefault && (
