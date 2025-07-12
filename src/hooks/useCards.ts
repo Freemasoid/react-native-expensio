@@ -19,11 +19,21 @@ export const useCards = (options: UseCardsOptions = {}) => {
   const dispatch = useAppDispatch();
   const { cards, isLoading, error } = useAppSelector((state) => state.cards);
 
-  const loadCards = useCallback(async () => {
+  const safeCards = cards || [];
+
+  useEffect(() => {
+    if (autoFetch) {
+      initializeCards();
+    }
+  }, [autoFetch]);
+
+  const initializeCards = useCallback(async () => {
     try {
       await dispatch(loadCardsFromStorage()).unwrap();
+
+      await dispatch(fetchAndStoreCards(USER_ID)).unwrap();
     } catch (error) {
-      console.error("Failed to load cards from storage:", error);
+      console.error("Failed to initialize cards:", error);
     }
   }, [dispatch]);
 
@@ -32,14 +42,16 @@ export const useCards = (options: UseCardsOptions = {}) => {
       await dispatch(fetchAndStoreCards(USER_ID)).unwrap();
     } catch (error) {
       console.error("Failed to refresh cards:", error);
+      throw error;
     }
   }, [dispatch]);
 
-  const clearCards = useCallback(async () => {
+  const clearData = useCallback(async () => {
     try {
       await dispatch(clearCardStorage()).unwrap();
     } catch (error) {
       console.error("Failed to clear cards:", error);
+      throw error;
     }
   }, [dispatch]);
 
@@ -54,7 +66,7 @@ export const useCards = (options: UseCardsOptions = {}) => {
           ...newCard,
           _id: tempId,
           tempId,
-          isDefault: newCard.isDefault ?? cards.length === 0,
+          isDefault: newCard.isDefault ?? safeCards.length === 0,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           _v: 0,
@@ -69,27 +81,23 @@ export const useCards = (options: UseCardsOptions = {}) => {
             tempId,
           })
         ).unwrap();
+
+        await refreshCards();
       } catch (error) {
         console.error("Failed to add card optimistically:", error);
         throw error;
       }
     },
-    [dispatch, cards.length]
+    [dispatch, safeCards.length, refreshCards]
   );
 
-  useEffect(() => {
-    if (autoFetch) {
-      loadCards();
-    }
-  }, [autoFetch, loadCards]);
-
   return {
-    cards,
+    cards: safeCards,
     isLoading,
     error,
-    loadCards,
+    initializeCards,
     refreshCards,
-    clearCards,
+    clearData,
     addCardOptimistically,
   };
 };
