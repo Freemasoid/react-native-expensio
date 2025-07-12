@@ -11,8 +11,6 @@ export interface Card {
   bankName: string;
   cardType: "credit" | "debit";
   lastFourDigits: string;
-  expiryMonth: string;
-  expiryYear: string;
   cardholderName: string;
   color: string;
   isDefault: boolean;
@@ -34,8 +32,6 @@ const initialState: CardsState = {
       bankName: "Bank of America",
       cardType: "debit",
       lastFourDigits: "4567",
-      expiryMonth: "12",
-      expiryYear: "24",
       cardholderName: "John Doe",
       color: "#1a472a",
       isDefault: true,
@@ -48,8 +44,6 @@ const initialState: CardsState = {
       bankName: "Chase",
       cardType: "credit",
       lastFourDigits: "8901",
-      expiryMonth: "08",
-      expiryYear: "25",
       cardholderName: "John Doe",
       color: "#0f1d4a",
       isDefault: false,

@@ -3,16 +3,9 @@ import { useTheme } from "@/hooks/useTheme";
 import { useAppDispatch } from "@/store/hooks";
 import type { Card } from "@/store/slices/cardsSlice";
 import { removeCard, setDefaultCard } from "@/store/slices/cardsSlice";
-import { Eye, MoreVertical, Star } from "lucide-react-native";
+import { MoreVertical, Star } from "lucide-react-native";
 import React from "react";
-import {
-  Alert,
-  Platform,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, Platform, StyleSheet, Text, View } from "react-native";
 import {
   Menu,
   MenuOption,
@@ -33,13 +26,9 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onEdit }) => {
     return `•••• •••• •••• ${lastFour}`;
   };
 
-  const formatExpiry = (month: string, year: string) => {
-    return `${month}/${year}`;
-  };
-
   const handleSetDefault = () => {
     if (!card.isDefault) {
-      dispatch(setDefaultCard(card.id));
+      dispatch(setDefaultCard(card._id));
     }
   };
 
@@ -53,7 +42,7 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onEdit }) => {
           text: "Remove",
           style: "destructive",
           onPress: () => {
-            dispatch(removeCard(card.id));
+            dispatch(removeCard(card._id));
           },
         },
       ]
@@ -154,23 +143,6 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onEdit }) => {
             <Text style={styles(colors).cardLabel}>Cardholder</Text>
             <Text style={styles(colors).cardValue}>{card.cardholderName}</Text>
           </View>
-
-          <View>
-            <Text style={styles(colors).cardLabel}>Expiry</Text>
-            <Text style={styles(colors).cardValue}>
-              {formatExpiry(card.expiryMonth, card.expiryYear)}
-            </Text>
-          </View>
-
-          <TouchableOpacity
-            style={styles(colors).eyeButton}
-            activeOpacity={0.7}
-          >
-            <Eye
-              size={18}
-              color="white"
-            />
-          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -284,9 +256,6 @@ const styles = (colors: any) =>
       fontSize: 14,
       fontWeight: "600",
       color: "white",
-    },
-    eyeButton: {
-      padding: 8,
     },
     menuItem: {
       flexDirection: "row",

@@ -60,8 +60,6 @@ type Card = {
   bankName: string;
   cardType: "credit" | "debit";
   lastFourDigits: string;
-  expiryMonth: string;
-  expiryYear: string;
   cardholderName: string;
   color: string;
   isDefault?: boolean;
@@ -75,8 +73,6 @@ type NewCard = Pick<
   | "bankName"
   | "cardType"
   | "lastFourDigits"
-  | "expiryMonth"
-  | "expiryYear"
   | "cardholderName"
   | "color"
   | "isDefault"
