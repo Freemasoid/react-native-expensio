@@ -1,10 +1,11 @@
+import { AddCardModal } from "@/components/modals/AddCardModal";
+import { useCards } from "@/hooks/useCards";
 import { useTheme } from "@/hooks/useTheme";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useAppSelector } from "@/store/hooks";
 import type { Card } from "@/store/slices/cardsSlice";
-import { addCard } from "@/store/slices/cardsSlice";
 import { LinearGradient } from "expo-linear-gradient";
-import React from "react";
-import { Alert, ScrollView, Text, View } from "react-native";
+import React, { useState } from "react";
+import { ScrollView, Text, View } from "react-native";
 import { MenuProvider } from "react-native-popup-menu";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AddCardButton, CardItem, EmptyState } from "./components";
@@ -12,35 +13,20 @@ import { styles } from "./styles";
 
 const CardsScreen: React.FC = () => {
   const { colors } = useTheme();
-  const dispatch = useAppDispatch();
-  const { cards, isLoading } = useAppSelector((state) => state.cards);
+  const { cards } = useCards();
+  const [isCardModalVisible, setIsCardModalVisible] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<Card | undefined>(undefined);
   const currentTheme = useAppSelector((state) => state.theme.currentTheme);
   const insets = useSafeAreaInsets();
 
-  const handleAddCard = () => {
-    Alert.alert(
-      "Add New Card",
-      "This would open a form to add a new card. For demo purposes, we'll add a sample card.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Add Sample Card",
-          onPress: () => {
-            const newCard: Omit<Card, "id" | "createdAt"> = {
-              bankName: "Sample Bank",
-              cardType: "credit",
-              lastFourDigits: "1234",
-              expiryMonth: "12",
-              expiryYear: "25",
-              cardholderName: "John Doe",
-              isDefault: cards.length === 0,
-              color: "#6366f1",
-            };
-            dispatch(addCard(newCard));
-          },
-        },
-      ]
-    );
+  const handleCloseCardModal = () => {
+    setIsCardModalVisible(false);
+    setSelectedCard(undefined);
+  };
+
+  const handleOpenCardModal = (data: Card) => {
+    setSelectedCard(data);
+    setIsCardModalVisible(true);
   };
 
   const handleEditCard = (card: Card) => {
@@ -67,8 +53,8 @@ const CardsScreen: React.FC = () => {
         </LinearGradient>
 
         <View style={styles(colors).content}>
-          {cards.length === 0 ? (
-            <EmptyState onAddCard={handleAddCard} />
+          {!cards || cards.length === 0 ? (
+            <EmptyState onPress={() => setIsCardModalVisible(true)} />
           ) : (
             <ScrollView
               style={styles(colors).scrollView}
@@ -76,22 +62,28 @@ const CardsScreen: React.FC = () => {
               showsVerticalScrollIndicator={false}
             >
               {/* Cards List */}
-              {cards.map((card) => (
+              {cards.map((card, index) => (
                 <CardItem
-                  key={card.id}
+                  key={card._id || `card-${index}`}
                   card={card}
-                  onEdit={handleEditCard}
+                  onEdit={() => handleOpenCardModal(card)}
                 />
               ))}
 
               {/* Add Card Button */}
-              <AddCardButton onPress={handleAddCard} />
+              <AddCardButton onPress={() => setIsCardModalVisible(true)} />
 
               {/* Bottom spacing for safe area */}
               <View style={styles(colors).bottomSpacing} />
             </ScrollView>
           )}
         </View>
+
+        <AddCardModal
+          isVisible={isCardModalVisible}
+          onClose={handleCloseCardModal}
+          card={selectedCard}
+        />
       </ScrollView>
     </MenuProvider>
   );
