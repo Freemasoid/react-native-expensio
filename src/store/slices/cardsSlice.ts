@@ -26,32 +26,7 @@ interface CardsState {
 }
 
 const initialState: CardsState = {
-  cards: [
-    {
-      _id: "686ebabb9527f4e45c8dc832",
-      bankName: "Bank of America",
-      cardType: "debit",
-      lastFourDigits: "4567",
-      cardholderName: "John Doe",
-      color: "#1a472a",
-      isDefault: true,
-      createdAt: "2024-01-15T10:30:00Z",
-      updatedAt: "2024-01-15T10:30:00Z",
-      _v: 0,
-    },
-    {
-      _id: "686ebabb9527f4e45c8dc831",
-      bankName: "Chase",
-      cardType: "credit",
-      lastFourDigits: "8901",
-      cardholderName: "John Doe",
-      color: "#0f1d4a",
-      isDefault: false,
-      createdAt: "2024-02-20T14:15:00Z",
-      updatedAt: "2024-02-20T14:15:00Z",
-      _v: 0,
-    },
-  ],
+  cards: [],
   isLoading: false,
   error: null,
 };
@@ -147,7 +122,7 @@ const cardsSlice = createSlice({
       })
       .addCase(loadCardsFromStorage.fulfilled, (state, action) => {
         state.isLoading = false;
-        if (action.payload) {
+        if (action.payload !== null && action.payload !== undefined) {
           state.cards = action.payload;
         }
       })
@@ -163,7 +138,7 @@ const cardsSlice = createSlice({
       })
       .addCase(fetchAndStoreCards.fulfilled, (state, action) => {
         state.isLoading = false;
-        if (action.payload) {
+        if (action.payload !== null && action.payload !== undefined) {
           state.cards = action.payload;
         }
       })

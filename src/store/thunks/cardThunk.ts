@@ -28,7 +28,7 @@ export const fetchAndStoreCards = createAsyncThunk(
   async (clerkId: string) => {
     try {
       const response = await getUserCards(clerkId);
-      const cardData = response.data;
+      const cardData = response.data.cards || [];
 
       await AsyncStorage.setItem(CARDS_STORAGE_KEY, JSON.stringify(cardData));
 
