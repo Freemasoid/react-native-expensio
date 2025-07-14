@@ -262,7 +262,6 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                 placeholder="Name your transaction..."
                 placeholderTextColor={GlobalColors.gray[400]}
                 keyboardType="default"
-                returnKeyType="none"
               />
             </View>
             {errors.amount && (
@@ -330,7 +329,6 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                 placeholder="0.00"
                 placeholderTextColor={GlobalColors.gray[400]}
                 keyboardType="numeric"
-                returnKeyType="none"
               />
             </View>
             {errors.amount && (
@@ -412,7 +410,6 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               multiline
               numberOfLines={3}
               textAlignVertical="top"
-              returnKeyType="done"
             />
           </View>
 
