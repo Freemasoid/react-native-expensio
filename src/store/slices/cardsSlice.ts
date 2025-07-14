@@ -4,6 +4,7 @@ import {
   clearCardStorage,
   fetchAndStoreCards,
   loadCardsFromStorage,
+  updateCardOptimistic,
 } from "../thunks/cardThunk";
 
 export interface Card {
@@ -177,6 +178,28 @@ const cardsSlice = createSlice({
         state.cards = state.cards.filter(
           (card: any) => card.tempId !== meta.tempId
         );
+      })
+
+      .addCase(updateCardOptimistic.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateCardOptimistic.fulfilled, (state, action) => {
+        state.isLoading = false;
+        const updatedCard = action.payload;
+
+        if (updatedCard) {
+          const cardIndex = state.cards.findIndex(
+            (card) => card._id === updatedCard._id
+          );
+          if (cardIndex !== -1) {
+            state.cards[cardIndex] = updatedCard;
+          }
+        }
+      })
+      .addCase(updateCardOptimistic.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to update card";
       });
   },
 });
