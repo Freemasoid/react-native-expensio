@@ -2,7 +2,13 @@ import { GlobalColors } from "@/constants/styles";
 import { useCards } from "@/hooks/useCards";
 import { useTheme } from "@/hooks/useTheme";
 import { Card, NewCard } from "@/types/types";
-import { Captions, CreditCard, FileText, X } from "lucide-react-native";
+import {
+  Captions,
+  CreditCard,
+  FileText,
+  Palette,
+  X,
+} from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -15,6 +21,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import ColorPicker from "../ColorPicker";
 
 interface AddCardModalProps {
   isVisible: boolean;
@@ -34,7 +41,7 @@ export const AddCardModal: React.FC<AddCardModalProps> = ({
     cardType: "debit",
     lastFourDigits: "",
     cardholderName: "",
-    color: "#1a472a",
+    color: "",
     isDefault: false,
   });
 
@@ -271,7 +278,6 @@ export const AddCardModal: React.FC<AddCardModalProps> = ({
               placeholderTextColor={GlobalColors.gray[400]}
               keyboardType="numeric"
               maxLength={4}
-              returnKeyType="next"
             />
 
             {errors.lastFourDigits && (
@@ -304,6 +310,21 @@ export const AddCardModal: React.FC<AddCardModalProps> = ({
                 {errors.cardholderName}
               </Text>
             )}
+          </View>
+
+          {/* Color picker */}
+          <View style={styles(colors).inputSection}>
+            <View style={styles(colors).labelContainer}>
+              <Palette
+                size={20}
+                color={colors.primary[500]}
+              />
+              <Text style={styles(colors).label}>Card color</Text>
+            </View>
+            <ColorPicker
+              selectedColor={formData.color}
+              onColorSelect={(color) => updateField("color", color)}
+            />
           </View>
 
           {/* Action Buttons */}
