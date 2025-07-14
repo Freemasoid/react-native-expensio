@@ -5,6 +5,7 @@ import {
   clearCardStorage,
   fetchAndStoreCards,
   loadCardsFromStorage,
+  updateCardOptimistic,
 } from "@/store/thunks/cardThunk";
 import { NewCard } from "@/types/types";
 import { USER_ID } from "@env";
@@ -91,6 +92,25 @@ export const useCards = (options: UseCardsOptions = {}) => {
     [dispatch, safeCards.length, refreshCards]
   );
 
+  const updateCardOptimistically = useCallback(
+    async (cardData: any) => {
+      try {
+        await dispatch(
+          updateCardOptimistic({
+            clerkId: USER_ID,
+            data: cardData,
+          })
+        ).unwrap();
+
+        await refreshCards();
+      } catch (error) {
+        console.error("Failed to update card optimistically:", error);
+        throw error;
+      }
+    },
+    [dispatch, refreshCards]
+  );
+
   return {
     cards: safeCards,
     isLoading,
@@ -99,5 +119,6 @@ export const useCards = (options: UseCardsOptions = {}) => {
     refreshCards,
     clearData,
     addCardOptimistically,
+    updateCardOptimistically,
   };
 };

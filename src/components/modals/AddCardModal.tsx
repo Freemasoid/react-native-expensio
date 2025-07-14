@@ -49,7 +49,7 @@ export const AddCardModal: React.FC<AddCardModalProps> = ({
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const { addCardOptimistically } = useCards();
+  const { addCardOptimistically, updateCardOptimistically } = useCards();
 
   const [errors, setErrors] = useState<{
     bankName?: string;
@@ -78,7 +78,7 @@ export const AddCardModal: React.FC<AddCardModalProps> = ({
       cardType: "debit",
       lastFourDigits: "",
       cardholderName: "",
-      color: "#1a472a",
+      color: "",
       isDefault: false,
     });
     setErrors({});
@@ -110,8 +110,10 @@ export const AddCardModal: React.FC<AddCardModalProps> = ({
 
     try {
       if (isEditing && card) {
-        // TODO: Implement update
-        console.log("Update");
+        await updateCardOptimistically({
+          ...formData,
+          _id: card._id,
+        });
       } else {
         await addCardOptimistically(formData);
       }
