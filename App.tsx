@@ -3,6 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { ChartPie, CreditCard, Home, User } from "lucide-react-native";
 import React from "react";
+import { LogBox, View } from "react-native";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 
@@ -11,12 +12,16 @@ import { GlobalColors, GlobalStyles } from "@/constants/styles";
 import { ModalProvider, useModal } from "@/contexts";
 import { useTheme } from "@/hooks/useTheme";
 import { persistor, store } from "@/store/store";
-import { View } from "react-native";
 
 import AnalyticsScreen from "@/screens/AnalyticsScreen";
 import CardsScreen from "@/screens/CardsScreen";
 import HomeScreen from "@/screens/HomeScreen";
 import ProfileScreen from "@/screens/ProfileScreen";
+
+// Suppress Victory Native reanimated warning
+LogBox.ignoreLogs([
+  "It looks like you might be using shared value's .value inside reanimated inline style",
+]);
 
 const Tab = createBottomTabNavigator();
 
