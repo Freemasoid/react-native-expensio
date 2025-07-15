@@ -7,7 +7,11 @@ A modern, intuitive expense tracking mobile application built with React Native,
 |                                                              |                                                        |                                                    |
 | ------------------------------------------------------------ | ------------------------------------------------------ | -------------------------------------------------- |
 | ![Theme](./assets/app-showcase/myappTheme.png)               | ![Analytics](./assets/app-showcase/myappAnalytics.png) | ![Profile](./assets/app-showcase/myappProfile.png) |
-| ![CreateUpdate](./assets/app-showcase/myappTransactions.png) | ![Demo](./assets/app-showcase/myapp1.gif)              |                                                    |
+| ![CreateUpdate](./assets/app-showcase/myappTransactions.png) | ![AddCards](./assets/app-showcase/myappCards.png)      |                                                    |
+
+| General                                              | Transactions                                              | Cards                                             |
+| ---------------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------- |
+| ![GeneralShowcase](./assets/app-showcase/myapp1.gif) | ![TransactionsShowcase](./assets/app-showcase/myapp3.gif) | ![CardShowcase](./assets/app-showcase/myapp2.gif) |
 
 ## 🚀 Features
 
