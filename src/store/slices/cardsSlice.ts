@@ -5,6 +5,7 @@ import {
   deleteCardOptimistic,
   fetchAndStoreCards,
   loadCardsFromStorage,
+  setDefaultCardOptimistic,
   updateCardOptimistic,
 } from "../thunks/cardThunk";
 
@@ -37,24 +38,6 @@ const cardsSlice = createSlice({
   name: "cards",
   initialState,
   reducers: {
-    addCard: (
-      state,
-      action: PayloadAction<Omit<Card, "_id" | "createdAt">>
-    ) => {
-      const newCard: Card = {
-        ...action.payload,
-        _id: `card_${Date.now()}`,
-        createdAt: new Date().toISOString(),
-      };
-
-      if (state.cards.length === 0 || newCard.isDefault) {
-        state.cards.forEach((card) => (card.isDefault = false));
-        newCard.isDefault = true;
-      }
-
-      state.cards.push(newCard);
-    },
-
     addCardOptimistically: (
       state,
       action: PayloadAction<Card & { tempId: string }>
@@ -69,7 +52,7 @@ const cardsSlice = createSlice({
       state.cards.push(newCard);
     },
 
-    updateCard: (
+    updateCardOptimistically: (
       state,
       action: PayloadAction<{ id: string; updates: Partial<Card> }>
     ) => {
@@ -85,7 +68,7 @@ const cardsSlice = createSlice({
       }
     },
 
-    removeCard: (state, action: PayloadAction<string>) => {
+    deleteCardOptimistically: (state, action: PayloadAction<string>) => {
       const cardId = action.payload;
       const cardToRemove = state.cards.find((card) => card._id === cardId);
 
@@ -96,7 +79,7 @@ const cardsSlice = createSlice({
       }
     },
 
-    setDefaultCard: (state, action: PayloadAction<string>) => {
+    setDefaultCardOptimistically: (state, action: PayloadAction<string>) => {
       const cardId = action.payload;
       state.cards.forEach((card) => {
         card.isDefault = card._id === cardId;
@@ -118,6 +101,7 @@ const cardsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // * LOAD FROM STORAGE
       .addCase(loadCardsFromStorage.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -134,6 +118,7 @@ const cardsSlice = createSlice({
           action.error.message || "Failed to load cards from storage";
       })
 
+      // * FETCH AND STORE
       .addCase(fetchAndStoreCards.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -149,11 +134,13 @@ const cardsSlice = createSlice({
         state.error = action.error.message || "Failed to fetch and store cards";
       })
 
+      // * CLEAR CARD STORAGE
       .addCase(clearCardStorage.fulfilled, (state) => {
         state.cards = [];
         state.error = null;
       })
 
+      // * ADD CARD OPTIMISTICALLY
       .addCase(addCardOptimistic.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -174,13 +161,9 @@ const cardsSlice = createSlice({
       .addCase(addCardOptimistic.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || "Failed to add card";
-
-        const meta = action.meta.arg;
-        state.cards = state.cards.filter(
-          (card: any) => card.tempId !== meta.tempId
-        );
       })
 
+      // * UPDATE CARD OPTIMISTICALLY
       .addCase(updateCardOptimistic.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -203,6 +186,7 @@ const cardsSlice = createSlice({
         state.error = action.error.message || "Failed to update card";
       })
 
+      // * DELETE CARD OPTIMISTICALLY
       .addCase(deleteCardOptimistic.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -229,16 +213,37 @@ const cardsSlice = createSlice({
       .addCase(deleteCardOptimistic.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || "Failed to delete card";
+      })
+
+      // * SET DEFAULT CARD OPTIMISTICALLY
+      .addCase(setDefaultCardOptimistic.pending, (state, action) => {
+        state.isLoading = true;
+        state.error = null;
+
+        const cardId = action.meta.arg.cardId;
+        state.cards.forEach((card) => {
+          card.isDefault = card._id === cardId;
+        });
+      })
+      .addCase(setDefaultCardOptimistic.fulfilled, (state, action) => {
+        state.isLoading = false;
+
+        if (action.payload && Array.isArray(action.payload)) {
+          state.cards = action.payload;
+        }
+      })
+      .addCase(setDefaultCardOptimistic.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to set default card";
       });
   },
 });
 
 export const {
-  addCard,
   addCardOptimistically,
-  updateCard,
-  removeCard,
-  setDefaultCard,
+  updateCardOptimistically,
+  deleteCardOptimistically,
+  setDefaultCardOptimistically,
   setLoading,
   setError,
   clearCards,

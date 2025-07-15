@@ -1,11 +1,11 @@
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { addCardOptimistically as addCardOptimisticallyAction } from "@/store/slices/cardsSlice";
 import {
   addCardOptimistic,
   clearCardStorage,
   deleteCardOptimistic,
   fetchAndStoreCards,
   loadCardsFromStorage,
+  setDefaultCardOptimistic,
   updateCardOptimistic,
 } from "@/store/thunks/cardThunk";
 import { NewCard } from "@/types/types";
@@ -23,12 +23,6 @@ export const useCards = (options: UseCardsOptions = {}) => {
 
   const safeCards = cards || [];
 
-  useEffect(() => {
-    if (autoFetch) {
-      initializeCards();
-    }
-  }, [autoFetch]);
-
   const initializeCards = useCallback(async () => {
     try {
       await dispatch(loadCardsFromStorage()).unwrap();
@@ -38,6 +32,12 @@ export const useCards = (options: UseCardsOptions = {}) => {
       console.error("Failed to initialize cards:", error);
     }
   }, [dispatch]);
+
+  useEffect(() => {
+    if (autoFetch) {
+      initializeCards();
+    }
+  }, [autoFetch, initializeCards]);
 
   const refreshCards = useCallback(async () => {
     try {
@@ -60,37 +60,18 @@ export const useCards = (options: UseCardsOptions = {}) => {
   const addCardOptimistically = useCallback(
     async (newCard: NewCard) => {
       try {
-        const tempId = `temp_${Date.now()}_${Math.random()
-          .toString(36)
-          .substring(2, 11)}`;
-
-        const pendingCard = {
-          ...newCard,
-          _id: tempId,
-          tempId,
-          isDefault: newCard.isDefault ?? safeCards.length === 0,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          _v: 0,
-        };
-
-        dispatch(addCardOptimisticallyAction(pendingCard));
-
         await dispatch(
           addCardOptimistic({
             clerkId: USER_ID,
             data: newCard,
-            tempId,
           })
         ).unwrap();
-
-        await refreshCards();
       } catch (error) {
         console.error("Failed to add card optimistically:", error);
         throw error;
       }
     },
-    [dispatch, safeCards.length, refreshCards]
+    [dispatch]
   );
 
   const updateCardOptimistically = useCallback(
@@ -102,14 +83,12 @@ export const useCards = (options: UseCardsOptions = {}) => {
             data: cardData,
           })
         ).unwrap();
-
-        await refreshCards();
       } catch (error) {
         console.error("Failed to update card optimistically:", error);
         throw error;
       }
     },
-    [dispatch, refreshCards]
+    [dispatch]
   );
 
   const deleteCardOptimistically = useCallback(
@@ -121,14 +100,29 @@ export const useCards = (options: UseCardsOptions = {}) => {
             cardId,
           })
         ).unwrap();
-
-        await refreshCards();
       } catch (error) {
         console.error("Failed to delete card optimistically:", error);
         throw error;
       }
     },
-    [dispatch, refreshCards]
+    [dispatch]
+  );
+
+  const setDefaultCardOptimistically = useCallback(
+    async (cardId: string) => {
+      try {
+        await dispatch(
+          setDefaultCardOptimistic({
+            clerkId: USER_ID,
+            cardId,
+          })
+        ).unwrap();
+      } catch (error) {
+        console.error("Failed to set card as default:", error);
+        throw error;
+      }
+    },
+    [dispatch]
   );
 
   return {
@@ -141,5 +135,6 @@ export const useCards = (options: UseCardsOptions = {}) => {
     addCardOptimistically,
     updateCardOptimistically,
     deleteCardOptimistically,
+    setDefaultCardOptimistically,
   };
 };
