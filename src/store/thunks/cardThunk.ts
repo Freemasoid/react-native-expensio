@@ -1,5 +1,10 @@
 import { NewCard } from "@/types/types";
-import { createCard, getUserCards, updateCard } from "@/utils/calls";
+import {
+  createCard,
+  deleteCard,
+  getUserCards,
+  updateCard,
+} from "@/utils/calls";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
@@ -115,6 +120,34 @@ export const updateCardOptimistic = createAsyncThunk(
       return response.data.card;
     } catch (error) {
       console.error("Failed to update card:", error);
+      throw error;
+    }
+  }
+);
+
+export const deleteCardOptimistic = createAsyncThunk(
+  "cards/deleteCardOptimistic",
+  async ({ clerkId, cardId }: { clerkId: string; cardId: string }) => {
+    try {
+      const response = await deleteCard(clerkId, { _id: cardId });
+
+      if (!response) {
+        throw new Error("Failed to delete card - no response received");
+      }
+
+      const storedCards = await AsyncStorage.getItem(CARDS_STORAGE_KEY);
+      const cards = storedCards ? JSON.parse(storedCards) : [];
+
+      const updatedCards = cards.filter((card: any) => card._id !== cardId);
+
+      await AsyncStorage.setItem(
+        CARDS_STORAGE_KEY,
+        JSON.stringify(updatedCards)
+      );
+
+      return cardId;
+    } catch (error) {
+      console.error("Failed to delete card:", error);
       throw error;
     }
   }

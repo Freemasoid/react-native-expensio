@@ -29,10 +29,6 @@ const CardsScreen: React.FC = () => {
     setIsCardModalVisible(true);
   };
 
-  const handleEditCard = (card: Card) => {
-    // TODO: add edit card functionality
-  };
-
   return (
     <MenuProvider>
       <ScrollView style={styles(colors).container}>

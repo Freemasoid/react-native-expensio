@@ -1,9 +1,10 @@
 import { GlobalColors } from "@/constants/styles";
+import { useCards } from "@/hooks/useCards";
 import { useContrastColor } from "@/hooks/useContrastColor";
 import { useTheme } from "@/hooks/useTheme";
 import { useAppDispatch } from "@/store/hooks";
 import type { Card } from "@/store/slices/cardsSlice";
-import { removeCard, setDefaultCard } from "@/store/slices/cardsSlice";
+import { setDefaultCard } from "@/store/slices/cardsSlice";
 import { MoreVertical, Star } from "lucide-react-native";
 import React, { useRef } from "react";
 import {
@@ -29,6 +30,7 @@ interface CardItemProps {
 export const CardItem: React.FC<CardItemProps> = ({ card, onEdit }) => {
   const { colors } = useTheme();
   const dispatch = useAppDispatch();
+  const { deleteCardOptimistically } = useCards();
   const menuRef = useRef<any>(null);
 
   const cardBackgroundColor = card.color || colors.primary[500];
@@ -45,7 +47,7 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onEdit }) => {
     }
   };
 
-  const handleRemoveCard = () => {
+  const handleRemoveCard = async () => {
     Alert.alert(
       "Remove Card",
       `Are you sure you want to remove this ${card.cardType || "card"}?`,
@@ -54,8 +56,17 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onEdit }) => {
         {
           text: "Remove",
           style: "destructive",
-          onPress: () => {
-            dispatch(removeCard(card._id));
+          onPress: async () => {
+            try {
+              if (!card._id) {
+                Alert.alert("Error", "Invalid card ID. Cannot delete card.");
+                return;
+              }
+              await deleteCardOptimistically(card._id);
+            } catch (error) {
+              console.error("Failed to delete card:", error);
+              Alert.alert("Error", "Failed to delete card. Please try again.");
+            }
           },
         },
       ]

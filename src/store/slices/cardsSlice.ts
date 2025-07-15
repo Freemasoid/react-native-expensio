@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   addCardOptimistic,
   clearCardStorage,
+  deleteCardOptimistic,
   fetchAndStoreCards,
   loadCardsFromStorage,
   updateCardOptimistic,
@@ -200,6 +201,34 @@ const cardsSlice = createSlice({
       .addCase(updateCardOptimistic.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || "Failed to update card";
+      })
+
+      .addCase(deleteCardOptimistic.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(deleteCardOptimistic.fulfilled, (state, action) => {
+        state.isLoading = false;
+        const deletedCardId = action.payload;
+
+        if (deletedCardId) {
+          const cardToDelete = state.cards.find(
+            (card) => card._id === deletedCardId
+          );
+          const wasDefault = cardToDelete?.isDefault;
+
+          state.cards = state.cards.filter(
+            (card) => card._id !== deletedCardId
+          );
+
+          if (wasDefault && state.cards.length > 0) {
+            state.cards[0].isDefault = true;
+          }
+        }
+      })
+      .addCase(deleteCardOptimistic.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to delete card";
       });
   },
 });

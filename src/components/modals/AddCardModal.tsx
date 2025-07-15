@@ -11,6 +11,7 @@ import {
 } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -49,7 +50,11 @@ export const AddCardModal: React.FC<AddCardModalProps> = ({
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const { addCardOptimistically, updateCardOptimistically } = useCards();
+  const {
+    addCardOptimistically,
+    updateCardOptimistically,
+    deleteCardOptimistically,
+  } = useCards();
 
   const [errors, setErrors] = useState<{
     bankName?: string;
@@ -126,15 +131,28 @@ export const AddCardModal: React.FC<AddCardModalProps> = ({
   };
 
   const handleDelete = async () => {
-    if (!card) return;
+    console.log("handleDelete called - START");
+
+    if (!card) {
+      console.log("No card found, returning early");
+      return;
+    }
+
+    console.log("handleDelete called with card:", card);
 
     try {
-      // TODO: Implement delete
-      console.log("Delete");
+      if (!card._id) {
+        Alert.alert("Error", "Invalid card ID. Cannot delete card.");
+        return;
+      }
+
+      await deleteCardOptimistically(card._id);
+
       resetForm();
       onClose();
     } catch (error) {
       console.error("Failed to delete card:", error);
+      Alert.alert("Error", "Failed to delete card. Please try again.");
     }
   };
 
@@ -367,7 +385,9 @@ export const AddCardModal: React.FC<AddCardModalProps> = ({
               <TouchableOpacity
                 style={styles(colors).deleteButton}
                 activeOpacity={0.8}
-                onPress={handleDelete}
+                onPress={() => {
+                  handleDelete();
+                }}
               >
                 <Text style={styles(colors).deleteButtonText}>Delete Card</Text>
               </TouchableOpacity>
