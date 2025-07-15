@@ -101,7 +101,6 @@ const AnalyticsLineChart: React.FC<AnalyticsLineChartProps> = ({
               points={points.y}
               color={GlobalColors.red}
               strokeWidth={3}
-              animate={{ type: "timing", duration: 300 }}
               curveType="natural"
               connectMissingData={true}
             />
