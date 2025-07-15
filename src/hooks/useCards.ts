@@ -3,6 +3,7 @@ import { addCardOptimistically as addCardOptimisticallyAction } from "@/store/sl
 import {
   addCardOptimistic,
   clearCardStorage,
+  deleteCardOptimistic,
   fetchAndStoreCards,
   loadCardsFromStorage,
   updateCardOptimistic,
@@ -111,6 +112,25 @@ export const useCards = (options: UseCardsOptions = {}) => {
     [dispatch, refreshCards]
   );
 
+  const deleteCardOptimistically = useCallback(
+    async (cardId: string) => {
+      try {
+        await dispatch(
+          deleteCardOptimistic({
+            clerkId: USER_ID,
+            cardId,
+          })
+        ).unwrap();
+
+        await refreshCards();
+      } catch (error) {
+        console.error("Failed to delete card optimistically:", error);
+        throw error;
+      }
+    },
+    [dispatch, refreshCards]
+  );
+
   return {
     cards: safeCards,
     isLoading,
@@ -120,5 +140,6 @@ export const useCards = (options: UseCardsOptions = {}) => {
     clearData,
     addCardOptimistically,
     updateCardOptimistically,
+    deleteCardOptimistically,
   };
 };

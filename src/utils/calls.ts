@@ -145,7 +145,7 @@ export async function updateCard(clerkId: string, data: Card) {
   }
 }
 
-export async function deleteCard(clerkId: string, data: Partial<Card>) {
+export async function deleteCard(clerkId: string, data: { _id: string }) {
   try {
     const response = await apiClient.delete(`/cards/${clerkId}`, { data });
     return response;
