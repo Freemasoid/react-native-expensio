@@ -1,11 +1,16 @@
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { addTransactionPending } from "@/store/slices/transactionSlice";
+import {
+  addTransactionPending,
+  clearPendingTransactions as clearPendingTransactionsAction,
+} from "@/store/slices/transactionSlice";
 import {
   addTransactionOptimistic,
+  clearPendingTransactions,
   clearTransactionsStorage,
   deleteTransactionOptimistic,
   fetchAndStoreTransactions,
   loadTransactionsFromStorage,
+  removePendingTransaction,
   savePendingTransaction,
   updateTransactionOptimistic,
 } from "@/store/thunks/transactionThunk";
@@ -47,8 +52,15 @@ export const useTransactions = (options: UseTransactionsOptions = {}) => {
     }
   };
 
-  const refreshTransactions = async () => {
+  const refreshTransactions = async (tempId?: string) => {
     try {
+      if (tempId) {
+        await removePendingTransaction(tempId);
+      }
+
+      dispatch(clearPendingTransactionsAction());
+      await clearPendingTransactions();
+
       await dispatch(
         fetchAndStoreTransactions({
           clerkId: USER_ID,
@@ -76,11 +88,13 @@ export const useTransactions = (options: UseTransactionsOptions = {}) => {
     try {
       dispatch(addTransactionPending(newTransaction));
 
+      const tempId = `temp_${Date.now()}_${Math.random()
+        .toString(36)
+        .substring(2, 11)}`;
+
       const pendingTransaction = {
         ...newTransaction,
-        tempId: `temp_${Date.now()}_${Math.random()
-          .toString(36)
-          .substring(2, 11)}`,
+        tempId: tempId,
         isPending: true as const,
         createdAt: new Date().toISOString(),
       };
@@ -95,7 +109,7 @@ export const useTransactions = (options: UseTransactionsOptions = {}) => {
         })
       ).unwrap();
 
-      await refreshTransactions();
+      await refreshTransactions(tempId);
     } catch (error) {
       console.error("Failed to add transaction optimistically:", error);
       throw error;
