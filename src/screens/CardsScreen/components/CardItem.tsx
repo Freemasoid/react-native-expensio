@@ -2,9 +2,7 @@ import { GlobalColors } from "@/constants/styles";
 import { useCards } from "@/hooks/useCards";
 import { useContrastColor } from "@/hooks/useContrastColor";
 import { useTheme } from "@/hooks/useTheme";
-import { useAppDispatch } from "@/store/hooks";
 import type { Card } from "@/store/slices/cardsSlice";
-import { setDefaultCard } from "@/store/slices/cardsSlice";
 import { MoreVertical, Star } from "lucide-react-native";
 import React, { useRef } from "react";
 import {
@@ -29,8 +27,7 @@ interface CardItemProps {
 
 export const CardItem: React.FC<CardItemProps> = ({ card, onEdit }) => {
   const { colors } = useTheme();
-  const dispatch = useAppDispatch();
-  const { deleteCardOptimistically } = useCards();
+  const { deleteCardOptimistically, setDefaultCardOptimistically } = useCards();
   const menuRef = useRef<any>(null);
 
   const cardBackgroundColor = card.color || colors.primary[500];
@@ -41,9 +38,17 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onEdit }) => {
     return `•••• •••• •••• ${lastFour}`;
   };
 
-  const handleSetDefault = () => {
-    if (!card.isDefault) {
-      dispatch(setDefaultCard(card._id));
+  const handleSetDefault = async () => {
+    try {
+      if (!card.isDefault) {
+        await setDefaultCardOptimistically(card._id);
+      }
+    } catch (error) {
+      console.error("Failed to set default card", error);
+      Alert.alert(
+        "Error",
+        "Failed to set card as default. Please try again later"
+      );
     }
   };
 
