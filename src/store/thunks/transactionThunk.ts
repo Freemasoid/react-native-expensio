@@ -130,6 +130,34 @@ export const savePendingTransaction = async (
   }
 };
 
+export const removePendingTransaction = async (tempId: string) => {
+  try {
+    const storedPending = await AsyncStorage.getItem(PENDING_TRANSACTIONS_KEY);
+    const pendingTransactions: PendingTransaction[] = storedPending
+      ? JSON.parse(storedPending)
+      : [];
+
+    const filteredTransactions = pendingTransactions.filter(
+      (transaction) => transaction.tempId !== tempId
+    );
+
+    await AsyncStorage.setItem(
+      PENDING_TRANSACTIONS_KEY,
+      JSON.stringify(filteredTransactions)
+    );
+  } catch (error) {
+    console.error("Failed to remove pending transaction:", error);
+  }
+};
+
+export const clearPendingTransactions = async () => {
+  try {
+    await AsyncStorage.removeItem(PENDING_TRANSACTIONS_KEY);
+  } catch (error) {
+    console.error("Failed to clear pending transactions:", error);
+  }
+};
+
 export const loadPendingTransactions = async (): Promise<
   PendingTransaction[]
 > => {
