@@ -14,6 +14,20 @@ import {
   updateTransactionOptimistic,
 } from "../thunks/transactionThunk";
 
+/**
+ * Redux state for transaction management
+ *
+ * Manages hierarchical transaction data organized by year/month,
+ * pending transactions for optimistic updates, and async operation states.
+ *
+ * @interface TransactionState
+ * @property {TransactionData | null} transactions - Hierarchical transaction data organized by year/month
+ * @property {PendingTransaction[]} pendingTransactions - Transactions awaiting server confirmation
+ * @property {boolean} isLoading - Loading state for async operations
+ * @property {string | null} error - Error message from failed operations
+ * @property {number | null} lastFetched - Timestamp of last successful data fetch
+ */
+
 interface TransactionState {
   transactions: TransactionData | null;
   pendingTransactions: PendingTransaction[];
@@ -22,6 +36,15 @@ interface TransactionState {
   lastFetched: number | null;
 }
 
+/**
+ * Initial state for transaction management
+ *
+ * @property {TransactionData | null} transactions - Hierarchical transaction data organized by year/month
+ * @property {PendingTransaction[]} pendingTransactions - Transactions awaiting server confirmation
+ * @property {boolean} isLoading - Loading state for async operations
+ * @property {string | null} error - Error message from failed operations
+ * @property {number | null} lastFetched - Timestamp of last successful data fetch
+ */
 const initialState: TransactionState = {
   transactions: null,
   pendingTransactions: [],
@@ -30,17 +53,98 @@ const initialState: TransactionState = {
   lastFetched: null,
 };
 
+// * HELPER FUNCTIONS
+
+/**
+ * Extracts year and month from a date string or Date object
+ * @param date - Date string (ISO format) or Date object
+ * @returns Object containing year and month as zero-padded strings
+ */
+const extractDateParts = (date: string | Date) => {
+  const dateObj = new Date(date);
+  const year = dateObj.getFullYear().toString();
+  const month = (dateObj.getMonth() + 1).toString().padStart(2, "0");
+  return { year, month };
+};
+
+const generateUniqueId = () =>
+  `temp_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+
+/**
+ * Ensures the nested transaction structure exists for a given year/month
+ * @param transactions - Transactions data to modify
+ * @param year - Year as string, e.g. "2025"
+ * @param month - Month as zero-padded string, e.g. "01"
+ */
+const ensureTransactionStructureExists = (
+  transactions: TransactionData,
+  year: string,
+  month: string
+) => {
+  if (!transactions.transactions[year]) {
+    transactions.transactions[year] = {};
+  }
+  if (!transactions.transactions[year][month]) {
+    transactions.transactions[year][month] = [];
+  }
+};
+
+/**
+ * Adds a transaction to the appropriate year/month bucket
+ * @param state - Current transaction state
+ * @param transaction - Transaction to add
+ */
+const addTransactionToYearMonthBucket = (
+  state: TransactionState,
+  transaction: Transaction
+) => {
+  if (!state.transactions) return;
+
+  const { year, month } = extractDateParts(transaction.date);
+  ensureTransactionStructureExists(state.transactions, year, month);
+  state.transactions.transactions[year][month].push(transaction);
+};
+
+/**
+ * Removes a transaction from all year/month buckets
+ * @param state - Current transaction state
+ * @param transactionId - ID of transaction to remove
+ */
+const removeTransactionFromAllBuckets = (
+  state: TransactionState,
+  transactionId: string
+) => {
+  if (!state.transactions) return;
+
+  Object.keys(state.transactions.transactions).forEach((year) => {
+    Object.keys(state.transactions!.transactions[year]).forEach((month) => {
+      state.transactions!.transactions[year][month] =
+        state.transactions!.transactions[year][month].filter(
+          (transaction) => transaction._id !== transactionId
+        );
+    });
+  });
+};
+
+// * REDUX SLICE DEFINITION
+
+/**
+ * Redux slice for managing transaction state
+ *
+ * Handles local transaction CRUD operations, optimistic updates,
+ * pending transaction management, and async operation states.
+ */
 const transactionSlice = createSlice({
   name: "transactions",
   initialState,
   reducers: {
+    /**
+     * Adds a new transaction to pending list for optimistic updates
+     */
     addTransactionPending: (state, action: PayloadAction<NewTransaction>) => {
-      const newTransaction = action.payload;
       const pendingTransaction: PendingTransaction = {
-        ...newTransaction,
-        tempId: `temp_${Date.now()}_${Math.random()
-          .toString(36)
-          .substring(2, 11)}`,
+        ...action.payload,
+        tempId: generateUniqueId(),
         isPending: true,
         createdAt: new Date().toISOString(),
       };
@@ -48,75 +152,35 @@ const transactionSlice = createSlice({
       state.pendingTransactions.push(pendingTransaction);
     },
 
+    /**
+     * Removes a pending transaction by temporary ID
+     */
     removePendingTransaction: (state, action: PayloadAction<string>) => {
-      const tempId = action.payload;
       state.pendingTransactions = state.pendingTransactions.filter(
-        (transaction) => transaction.tempId !== tempId
+        (transaction) => transaction.tempId !== action.payload
       );
     },
 
     addTransaction: (state, action: PayloadAction<Transaction>) => {
-      if (!state.transactions) return;
-
-      const transaction = action.payload;
-      const date = new Date(transaction.date);
-      const year = date.getFullYear().toString();
-      const month = (date.getMonth() + 1).toString().padStart(2, "0");
-
-      if (!state.transactions.transactions[year]) {
-        state.transactions.transactions[year] = {};
-      }
-      if (!state.transactions.transactions[year][month]) {
-        state.transactions.transactions[year][month] = [];
-      }
-
-      state.transactions.transactions[year][month].push(transaction);
+      addTransactionToYearMonthBucket(state, action.payload);
     },
 
     deleteTransaction: (state, action: PayloadAction<string>) => {
-      if (!state.transactions) return;
-
-      const transactionId = action.payload;
-
-      Object.keys(state.transactions.transactions).forEach((year) => {
-        Object.keys(state.transactions!.transactions[year]).forEach((month) => {
-          state.transactions!.transactions[year][month] =
-            state.transactions!.transactions[year][month].filter(
-              (transaction) => transaction._id !== transactionId
-            );
-        });
-      });
+      removeTransactionFromAllBuckets(state, action.payload);
     },
 
+    /**
+     * Updates a transaction, handling potential date changes that
+     * requires moving transaction between year/month buckets
+     */
     updateTransaction: (state, action: PayloadAction<Transaction>) => {
-      if (!state.transactions) return;
-
       const updatedTransaction = action.payload;
-      const transactionId = updatedTransaction._id;
 
-      Object.keys(state.transactions.transactions).forEach((year) => {
-        Object.keys(state.transactions!.transactions[year]).forEach((month) => {
-          state.transactions!.transactions[year][month] =
-            state.transactions!.transactions[year][month].filter(
-              (t) => t._id !== transactionId
-            );
-        });
-      });
+      // Remove from old location
+      removeTransactionFromAllBuckets(state, updatedTransaction._id);
 
-      const newDateObj = new Date(updatedTransaction.date);
-      const newYear = newDateObj.getFullYear().toString();
-      const newMonth = (newDateObj.getMonth() + 1).toString().padStart(2, "0");
-
-      if (!state.transactions.transactions[newYear]) {
-        state.transactions.transactions[newYear] = {};
-      }
-      if (!state.transactions.transactions[newYear][newMonth]) {
-        state.transactions.transactions[newYear][newMonth] = [];
-      }
-
-      state.transactions.transactions[newYear][newMonth].push(
-        updatedTransaction
-      );
+      // Add to new location based on current date
+      addTransactionToYearMonthBucket(state, updatedTransaction);
     },
 
     clearError: (state) => {
@@ -132,6 +196,7 @@ const transactionSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    // * LOAD FROM STORAGE
     builder
       .addCase(loadTransactionsFromStorage.pending, (state) => {
         state.isLoading = true;
@@ -146,7 +211,10 @@ const transactionSlice = createSlice({
       .addCase(loadTransactionsFromStorage.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || "Failed to load from storage";
-      })
+      });
+
+    // * FETCH AND STORE
+    builder
       .addCase(fetchAndStoreTransactions.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -159,42 +227,48 @@ const transactionSlice = createSlice({
       .addCase(fetchAndStoreTransactions.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || "Failed to fetch transactions";
-      })
-      .addCase(clearTransactionsStorage.fulfilled, (state) => {
-        state.transactions = null;
-        state.lastFetched = null;
+      });
+
+    // * CLEAR STORAGE
+    builder.addCase(clearTransactionsStorage.fulfilled, (state) => {
+      state.transactions = null;
+      state.lastFetched = null;
+    });
+
+    // * ADD TRANSACTION OPTIMISTICALLY
+    builder
+      .addCase(addTransactionOptimistic.pending, (state, action) => {
+        state.isLoading = true;
+        state.error = null;
       })
       .addCase(addTransactionOptimistic.fulfilled, (state, action) => {
+        state.isLoading = false;
+
         const { tempId, serverTransaction } = action.payload;
 
+        // Remove pending transaction after server confirmation
         state.pendingTransactions = state.pendingTransactions.filter(
           (transaction) => transaction.tempId !== tempId
         );
 
-        if (state.transactions && serverTransaction) {
-          const date = new Date(serverTransaction.date);
-          const year = date.getFullYear().toString();
-          const month = (date.getMonth() + 1).toString().padStart(2, "0");
-
-          if (!state.transactions.transactions[year]) {
-            state.transactions.transactions[year] = {};
-          }
-          if (!state.transactions.transactions[year][month]) {
-            state.transactions.transactions[year][month] = [];
-          }
-
-          state.transactions.transactions[year][month].push(serverTransaction);
+        // Add confirmed transaction from server
+        if (serverTransaction) {
+          addTransactionToYearMonthBucket(state, serverTransaction);
         }
       })
       .addCase(addTransactionOptimistic.rejected, (state, action) => {
-        const tempId = action.meta.arg.tempId;
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to add transaction";
 
+        // Clean up pending transaction on failure
+        const tempId = action.meta.arg.tempId;
         state.pendingTransactions = state.pendingTransactions.filter(
           (transaction) => transaction.tempId !== tempId
         );
+      });
 
-        state.error = action.error.message || "Failed to add transaction";
-      })
+    // * UPDATE TRANSACTION OPTIMISTICALLY
+    builder
       .addCase(updateTransactionOptimistic.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -202,9 +276,7 @@ const transactionSlice = createSlice({
       .addCase(updateTransactionOptimistic.fulfilled, (state, action) => {
         state.isLoading = false;
 
-        if (action.payload && action.payload.transactions) {
-          state.transactions = action.payload.transactions;
-        } else if (action.payload && action.payload.transaction) {
+        if (action.payload?.transactions) {
           const updatedTransaction = action.payload.transaction;
           transactionSlice.caseReducers.updateTransaction(state, {
             type: "updateTransaction",
@@ -216,22 +288,14 @@ const transactionSlice = createSlice({
         state.isLoading = false;
         state.error = action.error.message || "Failed to update transaction";
       })
+
+      // * DELETE TRANSACTION OPTIMISTICALLY
       .addCase(deleteTransactionOptimistic.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
       .addCase(deleteTransactionOptimistic.fulfilled, (state, action) => {
         state.isLoading = false;
-
-        if (action.payload && action.payload.transactions) {
-          state.transactions = action.payload.transactions;
-        } else if (action.payload && action.payload.transaction) {
-          const deletedTransaction = action.payload.transaction;
-          transactionSlice.caseReducers.deleteTransaction(state, {
-            type: "deleteTransaction",
-            payload: deletedTransaction._id,
-          });
-        }
       })
       .addCase(deleteTransactionOptimistic.rejected, (state, action) => {
         state.isLoading = false;
