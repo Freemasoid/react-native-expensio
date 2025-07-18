@@ -5,6 +5,8 @@ const expoConfig = require("eslint-config-expo/flat");
 module.exports = defineConfig([
   expoConfig,
   {
+    extends: ["expo", "plugin:@typescript-eslint/recommended"],
+    plugins: ["eslint-plugin-tsdoc"],
     ignores: ["dist/*"],
     rules: {
       // Allow @env imports
@@ -14,6 +16,7 @@ module.exports = defineConfig([
           ignore: ["@env"],
         },
       ],
+      "tsdoc/syntax": "warn",
     },
   },
 ]);
