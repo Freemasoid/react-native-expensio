@@ -1,4 +1,4 @@
-import { Card, NewCard, Transaction } from "@/types/types";
+import { Card, NewCard, NewTransaction, Transaction } from "@/types/types";
 import apiClient from "./api";
 
 // Transactions
@@ -21,7 +21,7 @@ export async function getUserTransactions(
   }
 }
 
-export async function createTransaction(clerkId: string, data: Transaction) {
+export async function createTransaction(clerkId: string, data: NewTransaction) {
   try {
     const response = await apiClient.post(`/transactions/${clerkId}`, data);
     return response;

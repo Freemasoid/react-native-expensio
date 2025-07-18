@@ -1,5 +1,5 @@
 type Transaction = {
-  _id?: string;
+  _id: string;
   title: string;
   amount: number;
   type: "expense" | "income";
