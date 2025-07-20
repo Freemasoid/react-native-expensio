@@ -157,9 +157,7 @@ export async function deleteCard(clerkId: string, data: { _id: string }) {
 
 export async function setDefaultCard(clerkId: string, data: { _id: string }) {
   try {
-    const response = await apiClient.post(`/cards/setDefault/${clerkId}`, {
-      data,
-    });
+    const response = await apiClient.post(`/cards/setDefault/${clerkId}`, data);
     return response;
   } catch (error) {
     console.error("Failed to set card as default", error);

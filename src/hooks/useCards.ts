@@ -119,6 +119,13 @@ export const useCards = (options: UseCardsOptions = {}) => {
         ).unwrap();
       } catch (error) {
         console.error("Failed to set card as default:", error);
+
+        try {
+          await dispatch(loadCardsFromStorage()).unwrap();
+        } catch (storageError) {
+          console.error("Failed to reload cards from storage:", storageError);
+        }
+
         throw error;
       }
     },
