@@ -235,16 +235,16 @@ const cardsSlice = createSlice({
       })
       .addCase(addCardOptimistic.fulfilled, (state, action) => {
         state.isLoading = false;
-        if (action.payload) {
-          const { tempId, card } = action.payload;
+        if (action.payload && action.payload.card) {
+          const newCard = action.payload.card;
 
-          // Replace temporary card with server-confirmed card
-          const cardIndex = state.cards.findIndex(
-            (c: any) => c.tempId === tempId
-          );
-          if (cardIndex !== -1) {
-            state.cards[cardIndex] = card;
+          // Handle default card logic
+          if (newCard.isDefault || state.cards.length === 0) {
+            state.cards.forEach((card) => (card.isDefault = false));
+            newCard.isDefault = true;
           }
+
+          state.cards.push(newCard);
         }
       })
       .addCase(addCardOptimistic.rejected, (state, action) => {

@@ -61,45 +61,32 @@ export const clearCardStorage = createAsyncThunk(
 export const addCardOptimistic = createAsyncThunk(
   "cards/addCardOptimistic",
   async ({ clerkId, data }: { clerkId: string; data: NewCard }) => {
-    const storedCards = await AsyncStorage.getItem(CARDS_STORAGE_KEY);
-    const cards = storedCards ? JSON.parse(storedCards) : [];
-
-    const tempId = `temp_${Date.now()}_${Math.random()
-      .toString(36)
-      .substring(2, 11)}`;
-
-    const optimisticCard = {
-      ...data,
-      _id: tempId,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    const optimisticCards = [...cards, optimisticCard];
-    await AsyncStorage.setItem(
-      CARDS_STORAGE_KEY,
-      JSON.stringify(optimisticCards)
-    );
-
     try {
       const response = await createCard(clerkId, data);
 
-      if (!response) {
+      if (!response || !response.data) {
         throw new Error("Failed to create card - no response received");
       }
 
-      const updatedCards = optimisticCards.map((card: any) =>
-        card.tempId === tempId ? response.data : card
-      );
+      // Ensure the returned card has all required fields
+      const newCard = {
+        ...response.data,
+        cardType: response.data.cardType || data.cardType,
+        isDefault: response.data.isDefault ?? data.isDefault ?? false,
+      };
+
+      // Update storage with the new card
+      const storedCards = await AsyncStorage.getItem(CARDS_STORAGE_KEY);
+      const cards = storedCards ? JSON.parse(storedCards) : [];
+      const updatedCards = [...cards, newCard];
 
       await AsyncStorage.setItem(
         CARDS_STORAGE_KEY,
         JSON.stringify(updatedCards)
       );
 
-      return { tempId, card: response.data };
+      return { card: newCard };
     } catch (error) {
-      await AsyncStorage.setItem(CARDS_STORAGE_KEY, JSON.stringify(cards));
       console.error("Failed to add new card:", error);
       throw error;
     }
