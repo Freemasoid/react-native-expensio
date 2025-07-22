@@ -1,11 +1,13 @@
 import { GlobalColors } from "@/constants/styles";
 import { useTheme } from "@/hooks/useTheme";
 import { useTransactions } from "@/hooks/useTransactions";
+import { useAppSelector } from "@/store/hooks";
 import { NewTransaction, Transaction } from "@/types/types";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import {
   Calendar,
   Captions,
+  CreditCard,
   EuroIcon,
   FileText,
   Receipt,
@@ -44,6 +46,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     amount: 0,
     type: "expense",
     category: "",
+    card: undefined,
     date: new Date().toISOString(),
     description: "",
   });
@@ -81,6 +84,8 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     "gifts",
   ];
 
+  const cards = useAppSelector((state) => state.cards.cards) || [];
+
   const isEditing = !!transaction;
 
   useEffect(() => {
@@ -89,6 +94,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         title: transaction.title,
         amount: transaction.amount,
         type: transaction.type,
+        card: transaction?.card,
         category: transaction.category === "income" ? "" : transaction.category,
         date: transaction.date,
         description: transaction.description || "",
@@ -102,6 +108,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       amount: 0,
       type: "expense",
       category: "",
+      card: undefined,
       date: new Date().toISOString(),
       description: "",
     });
@@ -367,6 +374,41 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               />
             </View>
           )}
+
+          <View style={styles(colors).inputSection}>
+            <View style={styles(colors).labelContainer}>
+              <CreditCard
+                size={20}
+                color={colors.primary[500]}
+              />
+              <Text style={styles(colors).label}>Card</Text>
+            </View>
+
+            <Dropdown
+              style={styles(colors).dropdown}
+              containerStyle={styles(colors).dropdownContainer}
+              data={cards.map((card) => ({
+                label: `${card.bankName} / ${card.lastFourDigits}`,
+                value: card._id,
+              }))}
+              search
+              searchPlaceholder="Search..."
+              maxHeight={300}
+              labelField="label"
+              valueField="value"
+              selectedTextStyle={styles(colors).dropdownSelectedText}
+              itemTextStyle={{ textTransform: "capitalize", fontSize: 18 }}
+              inputSearchStyle={{ borderRadius: 6, fontSize: 18 }}
+              placeholderStyle={{ fontSize: 18 }}
+              value={formData.card?._id}
+              onChange={(item) => {
+                const selectedCard = cards.find(
+                  (card) => card._id === item.value
+                );
+                updateField("card", selectedCard);
+              }}
+            />
+          </View>
 
           {/* Date Input */}
           <View style={styles(colors).inputSection}>

@@ -5,6 +5,14 @@ type Transaction = {
   type: "expense" | "income";
   category: string;
   date: string;
+  card?: {
+    _id: string;
+    bankName: string;
+    cardType: "credit" | "debit";
+    lastFourDigits: string;
+    cardholderName: string;
+    color: string;
+  };
   newDate?: string;
   description: string;
   createdAt?: string;
@@ -14,7 +22,7 @@ type Transaction = {
 
 type NewTransaction = Pick<
   Transaction,
-  "title" | "amount" | "type" | "category" | "date" | "description"
+  "title" | "amount" | "type" | "category" | "date" | "description" | "card"
 >;
 
 type PendingTransaction = NewTransaction & {
@@ -56,7 +64,7 @@ type TransactionData = {
 };
 
 type Card = {
-  _id?: string;
+  _id: string;
   bankName: string;
   cardType: "credit" | "debit";
   lastFourDigits: string;
