@@ -1,6 +1,8 @@
 import { GlobalColors } from "@/constants/styles";
+import { useTransactions } from "@/hooks/useTransactions";
+import { Transaction } from "@/types/types";
 import { useFont } from "@shopify/react-native-skia";
-import React from "react";
+import React, { useMemo } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { Bar, CartesianChart } from "victory-native";
 
@@ -17,26 +19,52 @@ interface SpendingChartProps {
 
 const SpendingChart: React.FC<SpendingChartProps> = ({ colors }) => {
   const font = useFont(require("~/assets/fonts/SpaceMono-Regular.ttf"), 13);
+  const { getCombinedMonthTransactions } = useTransactions();
 
-  const data = [
-    { day: "Mon", amount: 45 },
-    { day: "Tue", amount: 32 },
-    { day: "Wed", amount: 78 },
-    { day: "Thu", amount: 56 },
-    { day: "Fri", amount: 89 },
-    { day: "Sat", amount: 123 },
-    { day: "Sun", amount: 67 },
-  ];
+  const chartData = useMemo(() => {
+    const last7Days = [];
+    const today = new Date();
+
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      last7Days.push(date);
+    }
+
+    return last7Days.map((date) => {
+      const year = date.getFullYear().toString();
+      const month = (date.getMonth() + 1).toString().padStart(2, "0");
+      const dayKey = date.toISOString().split("T")[0];
+
+      const monthTransactions = getCombinedMonthTransactions(year, month);
+
+      const dayExpenses = monthTransactions
+        .filter((transaction: Transaction) => {
+          const transactionDate = new Date(transaction.date)
+            .toISOString()
+            .split("T")[0];
+          return transactionDate === dayKey && transaction.type === "expense";
+        })
+        .reduce((total, transaction) => total + transaction.amount, 0);
+
+      return {
+        day: date.toLocaleDateString("en-GB", {
+          day: "2-digit",
+        }),
+        amount: dayExpenses,
+      };
+    });
+  }, [getCombinedMonthTransactions]);
 
   return (
     <View style={styles(colors).container}>
       <View style={styles(colors).chartContainer}>
         <CartesianChart
-          data={data}
+          data={chartData}
           xKey="day"
           yKeys={["amount"]}
-          padding={{ left: 15, right: 15, top: 15, bottom: 30 }}
-          domainPadding={{ left: 20, right: 20, top: 20, bottom: 10 }}
+          padding={{ left: 0, right: 0, top: 15, bottom: 30 }}
+          domainPadding={{ left: 25, right: 25, top: 20, bottom: 10 }}
           xAxis={{
             font,
             labelColor: GlobalColors.gray[800],
@@ -44,6 +72,7 @@ const SpendingChart: React.FC<SpendingChartProps> = ({ colors }) => {
             axisSide: "bottom",
             labelPosition: "outset",
             lineWidth: 0,
+            tickCount: chartData.length,
           }}
         >
           {({ points, chartBounds }) => (
